@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'auth_app',
     'rest_framework_simplejwt',
     'django_rq',
+    'content.apps.ContentConfig',
 ]
 
 MIDDLEWARE = [
@@ -111,7 +112,7 @@ CACHES = {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": os.environ.get("REDIS_LOCATION", default="redis://redis:6379/1"),
         "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
         "KEY_PREFIX": "videoflix"
     }
