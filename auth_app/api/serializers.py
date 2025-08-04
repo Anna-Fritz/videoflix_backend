@@ -17,6 +17,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
             },
             'email': {
                 'required': True
+            },
+            'username': {
+                'error_messages': {
+                    'unique': 'Email or Password is invalid',
+                    'required': 'Email or Password is invalid',
+                    'blank': 'Email or Password is invalid',
+                }
             }
         }
 
@@ -28,13 +35,18 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError('Email already exists')
+            raise serializers.ValidationError('Email or Password is invalid')
+        return value
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError('Email or Password is invalid')
         return value
 
     def save(self):
         pw = self.validated_data['password']
 
-        account = User(email=self.validated_data['email'], username=self.validated_data['username'])
+        account = User(email=self.validated_data['email'], username=self.validated_data['username'], is_active=False)
         account.set_password(pw)
         account.save()
         return account
