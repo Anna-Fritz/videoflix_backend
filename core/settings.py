@@ -35,6 +35,9 @@ DEBUG = os.getenv('DEBUG', default=False)
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
 
+SITE_URL = os.environ.get("SITE_URL", default="http://localhost:4200")
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -189,3 +192,13 @@ SIMPLE_JWT = {
     # "BLACKLIST_AFTER_ROTATION": True,
     # "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')

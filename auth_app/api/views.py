@@ -1,9 +1,20 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+
+from django.conf import settings
+from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
+
 from .serializers import RegistrationSerializer, CustomTokenObtainPairSerializer
+from ..models import EmailConfirmationToken
+import base64
+
+User = get_user_model()
 
 
 class RegistrationView(APIView):
@@ -15,14 +26,97 @@ class RegistrationView(APIView):
         data = {}
         if serializer.is_valid():
             saved_account = serializer.save()
+
+            token = EmailConfirmationToken.objects.create(user=saved_account)
+
+            send_activation_email(saved_account, token)
+
             data = {
-                'username': saved_account.username,
-                'email': saved_account.email,
-                'user_id': saved_account.pk
+                'user': {
+                    'id': saved_account.pk,
+                    'email': saved_account.email
+                },
+                'token': token.token
             }
-            return Response(data)
+            return Response(data, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            print(f"❌ Serializer Fehler: {serializer.errors}")
+            return Response({
+                'error': 'Email or Password is invalid'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def activate_account(request, uidb64, token):
+    """
+    Activates user account with token send by mail
+    URL: /api/activate/<uidb64>/<token>/
+    """
+    try:
+        # decode user-ID from base64
+        user_id = base64.b64decode(uidb64).decode('utf-8')
+        user = get_object_or_404(User, id=user_id)
+
+        # validate token
+        confirmation_token = get_object_or_404(
+            EmailConfirmationToken,
+            user=user,
+            token=token
+        )
+
+        # check if user is active
+        if user.is_active:
+            return Response({
+                'message': 'Account is already activated.'
+            }, status=status.HTTP_200_OK)
+
+        # activate user
+        user.is_active = True
+        user.save()
+
+        # delete token
+        confirmation_token.delete()
+
+        return Response({
+            'message': 'Account successfully activated.'
+        }, status=status.HTTP_200_OK)
+
+    except (ValueError, User.DoesNotExist, EmailConfirmationToken.DoesNotExist):
+        return Response({
+            'error': 'Invalid activation link or token expired.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+def send_activation_email(user, token):
+    """Sendet Aktivierungsmail an den User"""
+    subject = 'Aktiviere dein Konto'
+
+    # create base64-coded user-ID
+    uidb64 = token.get_encoded_user_id()
+
+    # create activation url
+    activation_url = f"{settings.SITE_URL}/api/activate/{uidb64}/{token.token}/"
+
+    message = f"""
+    Hallo {user.username},
+
+    bitte aktiviere dein Konto, indem du auf folgenden Link klickst:
+    {activation_url}
+
+    Falls du dich nicht registriert hast, ignoriere diese E-Mail.
+
+    Viele Grüße
+    Dein Team
+    """
+
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=False,
+    )
 
 
 class CookieLoginView(TokenObtainPairView):
