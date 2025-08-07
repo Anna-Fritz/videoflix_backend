@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 import uuid
 
 User = get_user_model()
@@ -79,3 +81,48 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
 
         return data
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        """
+        Email validation
+        """
+        return value.lower().strip()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    new_password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        help_text="Das neue Passwort (mindestens 8 Zeichen)"
+    )
+    confirm_password = serializers.CharField(
+        write_only=True,
+        help_text="Bestätigung des neuen Passworts"
+    )
+
+    def validate_new_password(self, value):
+        """Validiert das neue Passwort mit Django's Standard-Validatoren"""
+        try:
+            validate_password(value)
+        except ValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
+        return value
+
+    def validate(self, attrs):
+        """Überprüft ob beide Passwörter übereinstimmen"""
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({
+                'confirm_password': 'Die Passwörter stimmen nicht überein.'
+            })
+        return attrs
+
+    def save(self, user):
+        """Setzt das neue Passwort für den Benutzer"""
+        password = self.validated_data['new_password']
+        user.set_password(password)
+        user.save()
+        return user
