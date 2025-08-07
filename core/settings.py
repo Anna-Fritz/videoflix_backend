@@ -36,6 +36,8 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
 
 SITE_URL = os.environ.get("SITE_URL", default="http://localhost:5500")
 
+SITE_NAME = os.getenv('SITE_NAME', 'Ihre Website')
+
 
 # Application definition
 
