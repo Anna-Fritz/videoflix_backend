@@ -1,16 +1,18 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
+import uuid
 
 User = get_user_model()
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    repeated_password = serializers.CharField(write_only=True)
+    confirmed_password = serializers.CharField(write_only=True)
+    privacy_policy = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'repeated_password']
+        fields = ['email', 'password', 'confirmed_password', 'privacy_policy']
         extra_kwargs = {
             'password': {
                 'write_only': True
@@ -18,16 +20,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
             'email': {
                 'required': True
             },
-            'username': {
-                'error_messages': {
-                    'unique': 'Email or Password is invalid',
-                    'required': 'Email or Password is invalid',
-                    'blank': 'Email or Password is invalid',
-                }
-            }
         }
 
-    def validate_repeated_password(self, value):
+    def validate_confirmed_password(self, value):
         password = self.initial_data.get('password')
         if password and value and password != value:
             raise serializers.ValidationError('Passwords do not match')
@@ -38,15 +33,21 @@ class RegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Email or Password is invalid')
         return value
 
-    def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError('Email or Password is invalid')
+    def validate_privacy_policy(self, value):
+        if value != "on":
+            raise serializers.ValidationError('Privacy policy must be accepted')
         return value
 
     def save(self):
         pw = self.validated_data['password']
+        email = self.validated_data['email']
+        username = email.split('@')[0]
 
-        account = User(email=self.validated_data['email'], username=self.validated_data['username'], is_active=False)
+        # if username already exists → fallback to UUID
+        if User.objects.filter(username=username).exists():
+            username = f"{username}_{uuid.uuid4().hex[:8]}"
+
+        account = User(email=email, username=username, is_active=False)
         account.set_password(pw)
         account.save()
         return account
