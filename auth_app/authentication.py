@@ -1,5 +1,4 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.conf import settings
 
 
 class CookieJWTAuthentication(JWTAuthentication):
@@ -7,16 +6,14 @@ class CookieJWTAuthentication(JWTAuthentication):
     Custom JWT authentication that reads tokens from cookies
     Falls back to header if no cookie is present
     """
-    
+
     def authenticate(self, request):
-        # Erst Authorization Header prüfen
         header = self.get_header(request)
         if header is not None:
             raw_token = self.get_raw_token(header)
         else:
-            # Fallback auf Cookie
             raw_token = request.COOKIES.get('access_token')
-        
+
         if raw_token is None:
             return None
 
