@@ -1,9 +1,14 @@
+import logging
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from django.template.exceptions import TemplateDoesNotExist
+from smtplib import SMTPException
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 class EmailService:
@@ -14,7 +19,7 @@ class EmailService:
 
     @staticmethod
     def send_password_reset_email(user):
-        """Sends Password Reset Email"""
+        """Send password reset email with link to frontend page."""
         token = default_token_generator.make_token(user)
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         reset_url = f"{settings.SITE_URL}/pages/auth/confirm_password.html?uid={uidb64}&token={token}"
@@ -22,19 +27,19 @@ class EmailService:
         context = {
             'user': user,
             'reset_url': reset_url,
-            'site_name': getattr(settings, 'SITE_NAME', 'Ihre Website'),
+            'site_name': getattr(settings, 'SITE_NAME', 'Your Website'),
         }
 
         EmailService._send_templated_email(
             template_name='password_reset',
-            subject='Passwort zurücksetzen',
+            subject='Reset Your Password',
             recipient=user.email,
             context=context
         )
 
     @staticmethod
     def send_registration_confirmation_email(user, token):
-        """Sendet Registrierungs-Bestätigungs E-Mail"""
+        """Send account activation email with link to frontend page."""
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         confirmation_url = f"{settings.SITE_URL}/pages/auth/activate.html?uid={uidb64}&token={token}"
 
@@ -46,7 +51,7 @@ class EmailService:
 
         EmailService._send_templated_email(
             template_name='registration_confirmation',
-            subject='Account bestätigen',
+            subject='Confirm Your Account',
             recipient=user.email,
             context=context
         )
@@ -54,17 +59,24 @@ class EmailService:
     @staticmethod
     def _send_templated_email(template_name, subject, recipient, context):
         """
-        Private Methode für Template-basierte E-Mails
-        DRY: Gemeinsame Logic für beide E-Mail-Typen
+        Render and send a templated email.
+        Always sends the text version.
+        Uses HTML version if available, otherwise falls back silently to text.
         """
         try:
+            # Text version is required
             message = render_to_string(f'auth_app/emails/{template_name}.txt', context)
+        except TemplateDoesNotExist:
+            logger.error(f"Required text template '{template_name}.txt' not found. Email not sent.")
+            raise
 
-            try:
-                html_message = render_to_string(f'auth_app/emails/{template_name}.html', context)
-            except Exception:
-                html_message = None
+        # HTML version is optional
+        try:
+            html_message = render_to_string(f'auth_app/emails/{template_name}.html', context)
+        except TemplateDoesNotExist:
+            html_message = None  # Silent fallback to text only
 
+        try:
             send_mail(
                 subject=subject,
                 message=message,
@@ -73,8 +85,10 @@ class EmailService:
                 html_message=html_message,
                 fail_silently=False,
             )
-
+            logger.info(f"Email successfully sent to {recipient} | Subject: '{subject}'")
+        except SMTPException as e:
+            logger.error(f"SMTP error while sending email to {recipient}: {e}")
+            raise
         except Exception as e:
-            # for logging
-            print(f"E-Mail-Versand fehlgeschlagen: {e}")
+            logger.exception(f"Unexpected error while sending email to {recipient}: {e}")
             raise
