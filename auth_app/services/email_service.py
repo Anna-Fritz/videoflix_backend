@@ -24,15 +24,17 @@ class EmailService:
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         reset_url = f"{settings.SITE_URL}/pages/auth/confirm_password.html?uid={uidb64}&token={token}"
 
+        site_name = getattr(settings, 'SITE_NAME', None) or 'Fallback Site Name'
+
         context = {
             'user': user,
             'reset_url': reset_url,
-            'site_name': getattr(settings, 'SITE_NAME', 'Your Website'),
+            'site_name': site_name,
         }
 
         EmailService._send_templated_email(
             template_name='password_reset',
-            subject='Reset Your Password',
+            subject='Passwort zurücksetzen',
             recipient=user.email,
             context=context
         )
@@ -51,7 +53,7 @@ class EmailService:
 
         EmailService._send_templated_email(
             template_name='registration_confirmation',
-            subject='Confirm Your Account',
+            subject='Bestätige deine Registrierung',
             recipient=user.email,
             context=context
         )
@@ -65,14 +67,14 @@ class EmailService:
         """
         try:
             # Text version is required
-            message = render_to_string(f'auth_app/emails/{template_name}.txt', context)
+            message = render_to_string(f'auth_app/emails/{template_name}.txt', context=context)
         except TemplateDoesNotExist:
             logger.error(f"Required text template '{template_name}.txt' not found. Email not sent.")
             raise
 
         # HTML version is optional
         try:
-            html_message = render_to_string(f'auth_app/emails/{template_name}.html', context)
+            html_message = render_to_string(f'auth_app/emails/{template_name}.html', context=context)
         except TemplateDoesNotExist:
             html_message = None  # Silent fallback to text only
 
