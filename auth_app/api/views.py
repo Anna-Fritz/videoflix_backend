@@ -195,9 +195,7 @@ class LogoutView(APIView):
 
 
 class PasswordResetView(APIView):
-    """
-    API Endpoint for sending password reset emails
-    """
+    """API Endpoint for sending password reset emails"""
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -226,28 +224,15 @@ class PasswordResetView(APIView):
 
 
 class PasswordResetConfirmView(APIView):
-    """
-    POST /api/password_confirm/<uidb64>/<token>/
-
-    Bestätigt die Passwortänderung mit dem in der E-Mail enthaltenen Token.
-    """
+    """Confirms the password change using the token contained in the email."""
     permission_classes = [AllowAny]
     serializer_class = PasswordResetConfirmSerializer
 
     def get_user(self, uidb64):
-        """
-        Dekodiert die uidb64 und gibt den entsprechenden User zurück
-
-        Der Prozess:
-        1. uidb64 ist base64-kodiert → muss dekodiert werden
-        2. Dekodiertes Ergebnis ist die User-ID als String
-        3. Mit dieser ID den User aus der Datenbank holen
-        """
+        """Decodes the uidb64 and returns the corresponding user."""
         try:
-            # Schritt 1: Base64-Dekodierung der uidb64
             uid = force_str(urlsafe_base64_decode(uidb64))
 
-            # Schritt 2: User anhand der dekodierten ID finden
             user = User.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             raise Http404("Link invalid or expired.")
@@ -263,16 +248,12 @@ class PasswordResetConfirmView(APIView):
         Verarbeitet die Passwort-Reset-Bestätigung
         """
         try:
-            # User anhand der uidb64 finden
             user = self.get_user(uidb64)
 
-            # Token validieren
             self.validate_token(user, token)
 
-            # Serializer validieren
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
-                # Passwort ändern
                 serializer.save(user)
 
                 return Response(
