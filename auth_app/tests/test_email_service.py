@@ -39,7 +39,7 @@ class TestEmailService:
         DEFAULT_FROM_EMAIL='noreply@example.com'
     )
     def test_send_password_reset_email_success(self, mock_render, mock_send_mail, user, mock_logger):
-        """Test erfolgreicher Versand einer Password Reset E-Mail."""
+        """Test successful sending of a password reset email."""
         # Mock template rendering
         mock_render.side_effect = [
             'Text message content',  # .txt template
@@ -99,7 +99,7 @@ class TestEmailService:
         DEFAULT_FROM_EMAIL='noreply@example.com'
     )
     def test_send_registration_confirmation_email_success(self, mock_render, mock_send_mail, user, mock_logger):
-        """Test erfolgreicher Versand einer Registrierungs-Bestätigungs E-Mail."""
+        """Test successful sending of a registration confirmation email."""
         test_token = 'confirmation-token-456'
 
         # Mock template rendering
@@ -128,7 +128,7 @@ class TestEmailService:
     @patch('auth_app.services.email_service.send_mail')
     @patch('auth_app.services.email_service.render_to_string')
     def test_send_templated_email_html_template_not_found(self, mock_render, mock_send_mail, user, mock_logger):
-        """Test E-Mail-Versand wenn HTML-Template nicht gefunden wird (sollte nur Text verwenden)."""
+        """Test email sending when the HTML template is not found (should use text only)."""
         # Mock: Text template exists, HTML template doesn't
         def render_side_effect(template_path, context):
             if template_path.endswith('.html'):
@@ -159,7 +159,7 @@ class TestEmailService:
     @patch('auth_app.services.email_service.send_mail')
     @patch('auth_app.services.email_service.render_to_string')
     def test_send_templated_email_text_template_not_found(self, mock_render, mock_send_mail, user, mock_logger):
-        """Test E-Mail-Versand schlägt fehl wenn Text-Template nicht gefunden wird."""
+        """Test email sending fails when the text template is not found."""
         # Mock: Text template doesn't exist
         mock_render.side_effect = TemplateDoesNotExist('test_template.txt')
 
@@ -184,7 +184,7 @@ class TestEmailService:
     @patch('auth_app.services.email_service.send_mail')
     @patch('auth_app.services.email_service.render_to_string')
     def test_send_templated_email_smtp_exception(self, mock_render, mock_send_mail, user, mock_logger):
-        """Test SMTP-Exception beim E-Mail-Versand."""
+        """Test SMTP exception during email sending."""
         # Mock successful template rendering
         mock_render.side_effect = ['Text content', '<html>HTML content</html>']
 
@@ -210,7 +210,7 @@ class TestEmailService:
     @patch('auth_app.services.email_service.send_mail')
     @patch('auth_app.services.email_service.render_to_string')
     def test_send_templated_email_unexpected_exception(self, mock_render, mock_send_mail, user, mock_logger):
-        """Test unerwartete Exception beim E-Mail-Versand."""
+        """Test unexpected exception during email sending."""
         # Mock successful template rendering
         mock_render.side_effect = ['Text content', None]  # HTML template not found
 
@@ -237,7 +237,7 @@ class TestEmailService:
     @patch('auth_app.services.email_service.render_to_string')
     @override_settings(SITE_NAME=None)  # Test fallback for SITE_NAME
     def test_send_password_reset_email_without_site_name(self, mock_render, mock_send_mail, user):
-        """Test Password Reset E-Mail ohne SITE_NAME Setting (sollte Fallback verwenden)."""
+        """Test password reset email without SITE_NAME setting (should use fallback)."""
         mock_render.side_effect = ['Text content', '<html>HTML content</html>']
 
         with patch('auth_app.services.email_service.default_token_generator.make_token') as mock_token:
@@ -259,7 +259,7 @@ class TestEmailService:
     @pytest.mark.django_db
     @override_settings(SITE_URL='https://example.com')
     def test_password_reset_url_format(self, user):
-        """Test korrektes URL-Format für Password Reset."""
+        """Test correct URL format for password reset."""
         with patch('auth_app.services.email_service.default_token_generator.make_token') as mock_token, \
              patch('auth_app.services.email_service.render_to_string') as mock_render, \
              patch('auth_app.services.email_service.send_mail'):
@@ -281,7 +281,7 @@ class TestEmailService:
     @pytest.mark.django_db
     @override_settings(SITE_URL='https://example.com')
     def test_registration_confirmation_url_format(self, user):
-        """Test korrektes URL-Format für Registration Confirmation."""
+        """Test correct URL format for registration confirmation."""
         test_token = 'confirmation-token-456'
 
         with patch('auth_app.services.email_service.render_to_string') as mock_render, \

@@ -14,7 +14,7 @@ User = get_user_model()
 
 @pytest.fixture
 def user():
-    """Fixture für Test-User."""
+    """Fixture for Test-User."""
     return User.objects.create_user(
         username='testuser',
         email='test@example.com',
@@ -25,7 +25,7 @@ def user():
 
 @pytest.fixture
 def inactive_user():
-    """Fixture für inaktiven Test-User."""
+    """Fixture for inactive Test-User."""
     return User.objects.create_user(
         username='inactiveuser',
         email='inactive@example.com',
@@ -35,23 +35,23 @@ def inactive_user():
 
 
 class TestRegistrationSerializer:
-    """Test Suite für RegistrationSerializer."""
+    """Test Suite for RegistrationSerializer."""
 
     @pytest.mark.django_db
     def test_registration_serializer_valid_data(self):
-        """Test erfolgreiche Registrierung mit validen Daten."""
+        """Test successful registration with valid data."""
         data = {
             'email': 'newuser@example.com',
             'password': 'validpassword123',
             'confirmed_password': 'validpassword123',
             'privacy_policy': 'on'
         }
-        
+
         serializer = RegistrationSerializer(data=data)
         assert serializer.is_valid()
-        
+
         user = serializer.save()
-        
+
         assert user.email == 'newuser@example.com'
         assert user.username == 'newuser'
         assert user.check_password('validpassword123')
@@ -60,14 +60,14 @@ class TestRegistrationSerializer:
 
     @pytest.mark.django_db
     def test_registration_serializer_password_mismatch(self):
-        """Test Registrierung mit nicht übereinstimmenden Passwörtern."""
+        """Test registration with non-matching passwords."""
         data = {
             'email': 'newuser@example.com',
             'password': 'password123',
             'confirmed_password': 'differentpassword',
             'privacy_policy': 'on'
         }
-        
+
         serializer = RegistrationSerializer(data=data)
         assert not serializer.is_valid()
         assert 'confirmed_password' in serializer.errors
@@ -75,14 +75,14 @@ class TestRegistrationSerializer:
 
     @pytest.mark.django_db
     def test_registration_serializer_duplicate_email(self, user):
-        """Test Registrierung mit bereits existierender E-Mail."""
+        """Test registration with an already existing email."""
         data = {
             'email': user.email,  # Bereits existierende E-Mail
             'password': 'validpassword123',
             'confirmed_password': 'validpassword123',
             'privacy_policy': 'on'
         }
-        
+
         serializer = RegistrationSerializer(data=data)
         assert not serializer.is_valid()
         assert 'email' in serializer.errors
@@ -90,14 +90,14 @@ class TestRegistrationSerializer:
 
     @pytest.mark.django_db
     def test_registration_serializer_privacy_policy_not_accepted(self):
-        """Test Registrierung ohne Akzeptierung der Datenschutzerklärung."""
+        """Test registration without accepting the privacy policy."""
         data = {
             'email': 'newuser@example.com',
             'password': 'validpassword123',
             'confirmed_password': 'validpassword123',
             'privacy_policy': 'off'
         }
-        
+
         serializer = RegistrationSerializer(data=data)
         assert not serializer.is_valid()
         assert 'privacy_policy' in serializer.errors
@@ -105,26 +105,26 @@ class TestRegistrationSerializer:
 
     @pytest.mark.django_db
     def test_registration_serializer_username_fallback(self):
-        """Test Username-Fallback bei bereits existierendem Username."""
+        """Test username fallback for an already existing username."""
         # Erstelle User mit Username 'testuser'
         User.objects.create_user(
             username='testuser',
             email='existing@example.com',
             password='password123'
         )
-        
+
         data = {
             'email': 'testuser@newdomain.com',  # Würde 'testuser' als Username generieren
             'password': 'validpassword123',
             'confirmed_password': 'validpassword123',
             'privacy_policy': 'on'
         }
-        
+
         serializer = RegistrationSerializer(data=data)
         assert serializer.is_valid()
-        
+
         user = serializer.save()
-        
+
         # Username sollte mit UUID-Suffix erweitert werden
         assert user.username.startswith('testuser_')
         assert len(user.username) == len('testuser_') + 8  # 8 Zeichen UUID
@@ -132,13 +132,13 @@ class TestRegistrationSerializer:
 
     @pytest.mark.django_db
     def test_registration_serializer_missing_required_fields(self):
-        """Test Registrierung mit fehlenden Pflichtfeldern."""
+        """Test registration with missing required fields."""
         data = {
             'password': 'validpassword123',
             'confirmed_password': 'validpassword123',
             # email und privacy_policy fehlen
         }
-        
+
         serializer = RegistrationSerializer(data=data)
         assert not serializer.is_valid()
         assert 'email' in serializer.errors
@@ -146,45 +146,45 @@ class TestRegistrationSerializer:
 
     @pytest.mark.django_db
     def test_registration_serializer_invalid_email_format(self):
-        """Test Registrierung mit ungültigem E-Mail-Format."""
+        """Test registration with an invalid email format."""
         data = {
             'email': 'invalid-email-format',
             'password': 'validpassword123',
             'confirmed_password': 'validpassword123',
             'privacy_policy': 'on'
         }
-        
+
         serializer = RegistrationSerializer(data=data)
         assert not serializer.is_valid()
         assert 'email' in serializer.errors
 
 
 class TestCustomTokenObtainPairSerializer:
-    """Test Suite für CustomTokenObtainPairSerializer."""
+    """Test Suite for CustomTokenObtainPairSerializer."""
 
     @pytest.mark.django_db
     def test_token_serializer_valid_credentials(self, user):
-        """Test Token-Generierung mit validen Credentials."""
+        """Test token generation with valid credentials."""
         data = {
             'email': user.email,
             'password': 'testpassword123'
         }
-        
+
         serializer = CustomTokenObtainPairSerializer(data=data)
         assert serializer.is_valid()
-        
+
         validated_data = serializer.validated_data
         assert 'access' in validated_data
         assert 'refresh' in validated_data
 
     @pytest.mark.django_db
     def test_token_serializer_invalid_email(self):
-        """Test Token-Generierung mit nicht existierender E-Mail."""
+        """Test token generation with a non-existent email."""
         data = {
             'email': 'nonexistent@example.com',
             'password': 'somepassword'
         }
-        
+
         serializer = CustomTokenObtainPairSerializer(data=data)
         assert not serializer.is_valid()
         assert 'non_field_errors' in serializer.errors
@@ -192,12 +192,12 @@ class TestCustomTokenObtainPairSerializer:
 
     @pytest.mark.django_db
     def test_token_serializer_invalid_password(self, user):
-        """Test Token-Generierung mit falschem Passwort."""
+        """Test token generation with incorrect password."""
         data = {
             'email': user.email,
             'password': 'wrongpassword'
         }
-        
+
         serializer = CustomTokenObtainPairSerializer(data=data)
         assert not serializer.is_valid()
         assert 'non_field_errors' in serializer.errors
@@ -205,7 +205,7 @@ class TestCustomTokenObtainPairSerializer:
 
     @pytest.mark.django_db
     def test_token_serializer_removes_username_field(self):
-        """Test dass Username-Feld aus Serializer entfernt wird."""
+        """Test that the username field is removed from the serializer."""
         serializer = CustomTokenObtainPairSerializer()
         assert 'username' not in serializer.fields
         assert 'email' in serializer.fields
@@ -213,7 +213,7 @@ class TestCustomTokenObtainPairSerializer:
 
     @pytest.mark.django_db
     def test_token_serializer_inactive_user(self, inactive_user):
-        """Test Token-Generierung mit inaktivem User."""
+        """Test token generation with an inactive user."""
         data = {
             'email': inactive_user.email,
             'password': 'testpassword123'
@@ -223,101 +223,100 @@ class TestCustomTokenObtainPairSerializer:
         with pytest.raises(AuthenticationFailed) as exc_info:
             serializer.is_valid(raise_exception=True)
 
-        # Optional: prüfen, dass die Fehlermeldung korrekt ist
         assert str(exc_info.value) == 'No active account found with the given credentials'
 
     @pytest.mark.django_db
     def test_token_serializer_case_insensitive_email(self, user):
-        """Test Token-Generierung mit unterschiedlicher Groß-/Kleinschreibung der E-Mail."""
+        """Test token generation with email case insensitivity."""
         data = {
-            'email': user.email.upper(),  # E-Mail in Großbuchstaben
+            'email': user.email.upper(),
             'password': 'testpassword123'
         }
-        
+
         serializer = CustomTokenObtainPairSerializer(data=data)
         assert serializer.is_valid()
 
 
 class TestPasswordResetSerializer:
-    """Test Suite für PasswordResetSerializer."""
+    """Test Suite for PasswordResetSerializer."""
 
     def test_password_reset_serializer_valid_email(self):
-        """Test Password Reset Serializer mit valider E-Mail."""
+        """Test password reset serializer with a valid email."""
         data = {'email': 'test@example.com'}
-        
+
         serializer = PasswordResetSerializer(data=data)
         assert serializer.is_valid()
         assert serializer.validated_data['email'] == 'test@example.com'
 
     def test_password_reset_serializer_email_normalization(self):
-        """Test E-Mail-Normalisierung (lowercase, strip)."""
+        """Test email normalization (lowercase, strip)."""
         data = {'email': '  TEST@EXAMPLE.COM  '}
-        
+
         serializer = PasswordResetSerializer(data=data)
         assert serializer.is_valid()
         assert serializer.validated_data['email'] == 'test@example.com'
 
     def test_password_reset_serializer_invalid_email(self):
-        """Test Password Reset Serializer mit ungültiger E-Mail."""
+        """Test password reset serializer with an invalid email."""
         data = {'email': 'invalid-email'}
-        
+
         serializer = PasswordResetSerializer(data=data)
         assert not serializer.is_valid()
         assert 'email' in serializer.errors
 
     def test_password_reset_serializer_missing_email(self):
-        """Test Password Reset Serializer ohne E-Mail."""
+        """Test Password Reset Serializer without email."""
         data = {}
-        
+
         serializer = PasswordResetSerializer(data=data)
         assert not serializer.is_valid()
         assert 'email' in serializer.errors
 
 
 class TestPasswordResetConfirmSerializer:
-    """Test Suite für PasswordResetConfirmSerializer."""
+    """Test Suite for PasswordResetConfirmSerializer."""
 
     @pytest.mark.django_db
     def test_password_reset_confirm_valid_data(self, user):
-        """Test Password Reset Confirm mit validen Daten."""
+        """Test Password Reset Confirm with valid data."""
         data = {
             'new_password': 'newvalidpassword123',
             'confirm_password': 'newvalidpassword123'
         }
-        
+
         serializer = PasswordResetConfirmSerializer(data=data)
         assert serializer.is_valid()
-        
+
         # Test save method
         updated_user = serializer.save(user)
         assert updated_user.check_password('newvalidpassword123')
 
     def test_password_reset_confirm_password_mismatch(self):
-        """Test Password Reset Confirm mit nicht übereinstimmenden Passwörtern."""
+        """Test password reset confirm with non-matching passwords."""
         data = {
             'new_password': 'newpassword123',
             'confirm_password': 'differentpassword123'
         }
-        
+
         serializer = PasswordResetConfirmSerializer(data=data)
         assert not serializer.is_valid()
         assert 'confirm_password' in serializer.errors
         assert 'Die Passwörter stimmen nicht überein.' in str(serializer.errors['confirm_password'])
 
     def test_password_reset_confirm_short_password(self):
-        """Test Password Reset Confirm mit zu kurzem Passwort."""
+        """Test password reset confirm with a too short password."""
         data = {
             'new_password': 'short',
             'confirm_password': 'short'
         }
-        
+
         serializer = PasswordResetConfirmSerializer(data=data)
         assert not serializer.is_valid()
         assert 'new_password' in serializer.errors
 
     @patch('auth_app.api.serializers.validate_password')
     def test_password_reset_confirm_django_validation_error(self, mock_validate_password):
-        """Test Password Reset Confirm mit Django Passwort-Validierungsfehlern."""
+        """Test password reset confirm with Django password validation errors."""
         # Mock Django's validate_password to raise ValidationError
         mock_validate_password.side_effect = ValidationError([
             'This password is too common.',
@@ -336,60 +335,60 @@ class TestPasswordResetConfirmSerializer:
         assert 'This password is entirely numeric.' in serializer.errors['new_password']
 
     def test_password_reset_confirm_missing_fields(self):
-        """Test Password Reset Confirm mit fehlenden Feldern."""
+        """Test password reset confirm with missing fields."""
         data = {'new_password': 'onlyonepassword'}
-        
+
         serializer = PasswordResetConfirmSerializer(data=data)
         assert not serializer.is_valid()
         assert 'confirm_password' in serializer.errors
 
     @pytest.mark.django_db
     def test_password_reset_confirm_save_method(self, user):
-        """Test save-Methode des Password Reset Confirm Serializers."""
+        """Test save method of the password reset confirm serializer."""
         original_password = user.password
-        
+
         data = {
             'new_password': 'brandnewpassword123',
             'confirm_password': 'brandnewpassword123'
         }
-        
+
         serializer = PasswordResetConfirmSerializer(data=data)
         assert serializer.is_valid()
-        
+
         updated_user = serializer.save(user)
-        
-        # Passwort sollte geändert sein
+
+        # Password should be changed
         assert updated_user.password != original_password
         assert updated_user.check_password('brandnewpassword123')
-        
-        # User sollte in Datenbank aktualisiert sein
+
+        # User should be updated in the database.
         user.refresh_from_db()
         assert user.check_password('brandnewpassword123')
 
 
 class TestSerializersEdgeCases:
-    """Edge Cases für alle Serializer."""
+    """Edge Cases for all serializers."""
 
     @pytest.mark.django_db
     def test_registration_with_email_containing_plus(self):
-        """Test Registrierung mit E-Mail die '+' enthält."""
+        """Test registration with an email containing a '+'."""
         data = {
             'email': 'user+tag@example.com',
             'password': 'validpassword123',
             'confirmed_password': 'validpassword123',
             'privacy_policy': 'on'
         }
-        
+
         serializer = RegistrationSerializer(data=data)
         assert serializer.is_valid()
-        
+
         user = serializer.save()
         assert user.email == 'user+tag@example.com'
         assert user.username == 'user+tag'  # Username wird aus E-Mail-Teil vor @ generiert
 
     @pytest.mark.django_db
     def test_registration_with_unicode_email(self):
-        """Test Registrierung mit Unicode-Zeichen in E-Mail."""
+        """Test registration with Unicode characters in the email."""
         data = {
             'email': 'üser@exämple.com',
             'password': 'validpassword123',
@@ -406,7 +405,7 @@ class TestSerializersEdgeCases:
 
     @pytest.mark.django_db
     def test_token_serializer_with_empty_strings(self):
-        """Test Token Serializer mit leeren Strings."""
+        """Test token serializer with empty strings."""
         data = {
             'email': '',
             'password': ''
@@ -417,9 +416,9 @@ class TestSerializersEdgeCases:
         assert 'email' in serializer.errors or 'non_field_errors' in serializer.errors
 
     def test_password_reset_serializer_with_whitespace_only_email(self):
-        """Test Password Reset mit E-Mail die nur Whitespace enthält."""
+        """Test password reset with an email containing only whitespace."""
         data = {'email': '   '}
-        
+
         serializer = PasswordResetSerializer(data=data)
         # Nach strip() ist die E-Mail leer, sollte Validierungsfehler geben
         assert not serializer.is_valid()
@@ -427,25 +426,25 @@ class TestSerializersEdgeCases:
     @pytest.mark.django_db
     @patch('uuid.uuid4')
     def test_registration_username_collision_with_uuid(self, mock_uuid):
-        """Test Username-Kollision mit mocken UUID."""
+        """Test username collision with a mocked UUID."""
         mock_uuid.return_value.hex = 'abcd1234' * 4  # 32 Zeichen
-        
+
         # Erstelle bestehenden User
         User.objects.create_user(
             username='collision',
             email='existing@example.com',
             password='password123'
         )
-        
+
         data = {
             'email': 'collision@newdomain.com',
             'password': 'validpassword123',
             'confirmed_password': 'validpassword123',
             'privacy_policy': 'on'
         }
-        
+
         serializer = RegistrationSerializer(data=data)
         assert serializer.is_valid()
-        
+
         user = serializer.save()
         assert user.username == 'collision_abcd1234'
