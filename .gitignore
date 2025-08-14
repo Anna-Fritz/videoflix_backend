@@ -95,3 +95,7 @@ test_data/
 # Windows Thumbs.db
 # Exclude Windows system files like Thumbs.db
 Thumbs.db
+
+.devcontainer
+
+coverage.xml

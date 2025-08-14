@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 import uuid
+import re
 
 User = get_user_model()
 
@@ -31,6 +32,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return value
 
     def validate_email(self, value):
+        # ASCII-only validation
+        if not re.match(r'^[\x00-\x7F]+$', value):
+            raise serializers.ValidationError('Unicode characters in email are not allowed')
+
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError('Email or Password is invalid')
         return value
@@ -68,6 +73,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
+
+        # Email case-insensitive
+        if isinstance(email, str):
+            email = email.lower()
+            attrs['email'] = email
 
         try:
             user = User.objects.get(email=email)
