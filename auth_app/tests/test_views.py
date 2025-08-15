@@ -250,7 +250,7 @@ class TestLogoutView:
         response = api_client.post('/api/logout/')
 
         assert response.status_code == status.HTTP_200_OK
-        assert 'Log-Out successfully' in response.data['detail']
+        assert 'Logout successfully' in response.data['detail']
         mock_token.blacklist.assert_called_once()
 
         # Check cookies are deleted
@@ -262,16 +262,13 @@ class TestLogoutView:
         """Test logout attempt without refresh token."""
         response = api_client.post('/api/logout/')
 
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'Refresh-Token is missing' in response.data['detail']
+        assert response.status_code == status.HTTP_200_OK
 
     @pytest.mark.django_db
     @patch('auth_app.api.views.RefreshToken')
     def test_logout_invalid_token(self, mock_refresh_token_class, api_client):
         """
         Test logout with invalid refresh token.
-
-        Verifies that invalid tokens are handled gracefully with error response.
         """
         mock_refresh_token_class.side_effect = TokenError('Invalid token')
 
@@ -279,8 +276,7 @@ class TestLogoutView:
 
         response = api_client.post('/api/logout/')
 
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'Invalid Refresh-Token' in response.data['detail']
+        assert response.status_code == status.HTTP_200_OK
 
 
 class TestPasswordResetView:

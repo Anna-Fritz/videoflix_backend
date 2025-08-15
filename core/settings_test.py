@@ -2,7 +2,7 @@ import os
 from .settings import *
 
 
-# Separate Test-Datenbank (z.B. SQLite in-memory oder separate Postgres DB)
+# Separate Postgres DB for testing
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -14,11 +14,8 @@ DATABASES = {
     }
 }
 
-# Kein echtes Email-Versenden
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 
-# Reduziere Middleware/Logging, wenn gewünscht
-# Beispiel: logging während Tests weniger output
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -33,7 +30,7 @@ LOGGING = {
     },
 }
 
-# Redis: spezieller Slot für Tests
+# Redis: special slot for tests
 REDIS_URL = 'redis://redis:6379/2'
 
 
@@ -52,10 +49,6 @@ RQ_QUEUES = {
     },
 }
 
-
-# Optional: debug-Modus für Tests an (kann helfen)
 DEBUG = True
 
-# Weitere Anpassungen, die du nur für Tests möchtest
-# z.B. schnellere Passwörter, Mock-Services, etc.
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
