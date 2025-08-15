@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from django.shortcuts import get_object_or_404
@@ -14,7 +14,6 @@ from django.utils.http import urlsafe_base64_decode
 from django.http import Http404
 
 from .serializers import RegistrationSerializer, CustomTokenObtainPairSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer
-from ..authentication import CookieJWTAuthentication
 from ..services.email_service import EmailService
 
 User = get_user_model()
@@ -77,34 +76,10 @@ def activate_account(request, uidb64, token):
             'message': 'Account successfully activated.'
         }, status=status.HTTP_200_OK)
 
-    # except (ValueError, User.DoesNotExist, EmailConfirmationToken.DoesNotExist):
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         return Response({
             'error': 'Invalid activation link or token expired.'
         }, status=status.HTTP_400_BAD_REQUEST)
-
-
-class CookieLoginView(TokenObtainPairView):
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        refresh = response.data.get("refresh")
-        access = response.data.get("access")
-        response.set_cookie(
-            key="access_token",
-            value=access,
-            httponly=True,
-            secure=True,        # better safe in .env file
-            samesite="Lax"
-        )
-        response.set_cookie(
-            key="refresh_token",
-            value=refresh,
-            httponly=True,
-            secure=True,
-            samesite="Lax"
-        )
-        response.data = {"message": "login successfull"}
-        return response
 
 
 class CookieRefreshView(TokenRefreshView):
@@ -129,13 +104,15 @@ class CookieRefreshView(TokenRefreshView):
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=True,
-            samesite="Lax"
+            secure=False,   # always True in production
+            samesite="Lax",
+            path="/"
         )
         return response
 
 
 class CookieEmailLoginView(TokenObtainPairView):
+    permission_classes = [AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
@@ -149,48 +126,40 @@ class CookieEmailLoginView(TokenObtainPairView):
             key="access_token",
             value=str(access),
             httponly=True,
-            secure=True,        # better safe in .env file
-            samesite="Lax"
+            secure=False,   # always True in production, better safe in .env
+            samesite="Lax",
+            path="/"
         )
         response.set_cookie(
             key="refresh_token",
             value=str(refresh),
             httponly=True,
-            secure=True,
-            samesite="Lax"
+            secure=False,   # always True in production, better safe in .env
+            samesite="Lax",
+            path="/"
         )
         return response
 
 
 class LogoutView(APIView):
     permission_classes = [AllowAny]
-    # authentication_classes = [CookieJWTAuthentication]
-    authentication_classes = []
 
     def post(self, request):
         refresh_token = request.COOKIES.get('refresh_token')
 
-        if not refresh_token:
-            return Response(
-                {"detail": "Refresh-Token is missing."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-        except TokenError:
-            return Response(
-                {"detail": "Invalid Refresh-Token."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except TokenError:
+                pass
 
         response = Response(
-            {"detail": "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."},
+            {"detail": "Logout successfully! All Tokens will be deleted. Refresh token is now invalid."},
             status=status.HTTP_200_OK
         )
-        response.delete_cookie("access_token")
-        response.delete_cookie("refresh_token")
+        response.delete_cookie("access_token", path="/", samesite="Lax")
+        response.delete_cookie("refresh_token", path="/", samesite="Lax")
         return response
 
 
