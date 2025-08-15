@@ -1,25 +1,23 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import InvalidToken, AuthenticationFailed
+from django.utils.translation import gettext_lazy as _
 
 
 class CookieJWTAuthentication(JWTAuthentication):
     """
-    Custom JWT authentication that reads tokens from cookies
-    Falls back to header if no cookie is present
+    Reads the JWT access token from an HttpOnly cookie.
+    Expects a cookie named access_token.
     """
-
     def authenticate(self, request):
-        header = self.get_header(request)
-        if header is not None:
-            raw_token = self.get_raw_token(header)
-        else:
-            raw_token = request.COOKIES.get('access_token')
+        access_token = request.COOKIES.get('access_token')
 
-        if raw_token is None:
-            return None
+        if not access_token:
+            return None  # No token -> try next authentication
 
         try:
-            validated_token = self.get_validated_token(raw_token)
-            user = self.get_user(validated_token)
-            return (user, validated_token)
-        except Exception:
-            return None
+            validated_token = self.get_validated_token(access_token)
+        except InvalidToken:
+            raise AuthenticationFailed(_('Invalid or expired token.'))
+
+        user = self.get_user(validated_token)
+        return (user, validated_token)
