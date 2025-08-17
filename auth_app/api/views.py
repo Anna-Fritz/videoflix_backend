@@ -83,6 +83,9 @@ def activate_account(request, uidb64, token):
 
 
 class CookieRefreshView(TokenRefreshView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get("refresh_token")
         if refresh_token is None:
