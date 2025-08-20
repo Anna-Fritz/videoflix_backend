@@ -1,9 +1,11 @@
 import os
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from django.conf import settings
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 from ..models import Video
 from .serializers import VideoSerializer
 
@@ -27,7 +29,7 @@ def video_manifest(request, movie_id, resolution):
     try:
         video = Video.objects.get(id=movie_id, processing_status='completed')
     except Video.DoesNotExist:
-        raise Http404("Video nicht gefunden")
+        return Response({"detail": "Video not found"}, status=status.HTTP_404_NOT_FOUND)
 
     # Determines the appropriate HLS path according to the requested resolution.
     resolution_map = {
@@ -38,12 +40,12 @@ def video_manifest(request, movie_id, resolution):
 
     hls_path = resolution_map.get(resolution)
     if not hls_path:
-        raise Http404("Resolution not available")
+        return Response({"detail": "Resolution not available"}, status=status.HTTP_404_NOT_FOUND)
 
     manifest_file = os.path.join(settings.MEDIA_ROOT, hls_path, 'index.m3u8')
 
     if not os.path.exists(manifest_file):
-        raise Http404("Manifest file not found")
+        return Response({"detail": "Manifest file not found"}, status=status.HTTP_404_NOT_FOUND)
 
     with open(manifest_file, 'r') as f:
         content = f.read()
@@ -60,7 +62,7 @@ def video_segment(request, movie_id, resolution, segment):
     try:
         video = Video.objects.get(id=movie_id, processing_status='completed')
     except Video.DoesNotExist:
-        raise Http404("Video not found.")
+        return Response({"detail": "Video not found"}, status=status.HTTP_404_NOT_FOUND)
 
     resolution_map = {
         '480p': video.hls_480p_path,
@@ -70,12 +72,12 @@ def video_segment(request, movie_id, resolution, segment):
 
     hls_path = resolution_map.get(resolution)
     if not hls_path:
-        raise Http404("Resolution not available")
+        return Response({"detail": "Resolution not available"}, status=status.HTTP_404_NOT_FOUND)
 
     segment_file = os.path.join(settings.MEDIA_ROOT, hls_path, segment)
 
     if not os.path.exists(segment_file):
-        raise Http404("Segment not found")
+        return Response({"detail": "Segment file not found"}, status=status.HTTP_404_NOT_FOUND)
 
     with open(segment_file, 'rb') as f:
         content = f.read()
