@@ -1,8 +1,6 @@
 import os
 from .settings import *
 
-
-# Separate Postgres DB for testing
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -30,7 +28,6 @@ LOGGING = {
     },
 }
 
-# Redis: special slot for tests
 REDIS_URL = 'redis://redis:6379/2'
 
 
