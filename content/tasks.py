@@ -78,11 +78,9 @@ def process_video(video_id):
 def create_thumbnail(video, input_path):
     """Create thumbnail of video"""
     try:
-        # Erstelle temporäre Datei
         with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as temp_file:
             temp_thumbnail_path = temp_file.name
 
-        # FFmpeg command für temporäre Datei
         cmd = [
             'ffmpeg',
             '-i', input_path,
@@ -96,13 +94,10 @@ def create_thumbnail(video, input_path):
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode == 0 and os.path.exists(temp_thumbnail_path):
-            # RICHTIG: Django File-System verwenden
             with open(temp_thumbnail_path, 'rb') as f:
                 django_file = File(f)
-                # Das verwendet automatisch thumbnail_upload_path!
                 video.thumbnail_url.save('thumbnail.jpg', django_file, save=True)
 
-            # Temporäre Datei löschen
             os.unlink(temp_thumbnail_path)
             print(f"Thumbnail created successfully for video {video.id}")
         else:
@@ -110,6 +105,5 @@ def create_thumbnail(video, input_path):
 
     except Exception as e:
         print(f"Error creating thumbnail for video {video.id}: {str(e)}")
-        # Cleanup: temporäre Datei löschen falls vorhanden
         if 'temp_thumbnail_path' in locals() and os.path.exists(temp_thumbnail_path):
             os.unlink(temp_thumbnail_path)
