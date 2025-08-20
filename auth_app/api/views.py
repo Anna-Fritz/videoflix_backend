@@ -107,8 +107,8 @@ class CookieRefreshView(TokenRefreshView):
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=False,   # always True in production
-            samesite="Lax",
+            secure=True,   # always True in production
+            samesite="None",
             path="/"
         )
         return response
@@ -129,16 +129,16 @@ class CookieEmailLoginView(TokenObtainPairView):
             key="access_token",
             value=str(access),
             httponly=True,
-            secure=False,   # always True in production, better safe in .env
-            samesite="Lax",
+            secure=True,   # always True in production, better safe in .env
+            samesite="None",
             path="/"
         )
         response.set_cookie(
             key="refresh_token",
             value=str(refresh),
             httponly=True,
-            secure=False,   # always True in production, better safe in .env
-            samesite="Lax",
+            secure=True,   # always True in production, better safe in .env
+            samesite="None",
             path="/"
         )
         return response
@@ -161,8 +161,8 @@ class LogoutView(APIView):
             {"detail": "Logout successfully! All Tokens will be deleted. Refresh token is now invalid."},
             status=status.HTTP_200_OK
         )
-        response.delete_cookie("access_token", path="/", samesite="Lax")
-        response.delete_cookie("refresh_token", path="/", samesite="Lax")
+        response.delete_cookie("access_token", path="/", samesite="None")
+        response.delete_cookie("refresh_token", path="/", samesite="None")
         return response
 
 
@@ -211,14 +211,12 @@ class PasswordResetConfirmView(APIView):
         return user
 
     def validate_token(self, user, token):
-        """Überprüft ob der Token für den User gültig ist"""
+        """Checks whether the token is valid for the user."""
         if not default_token_generator.check_token(user, token):
             raise Http404("Token invalid or expired.")
 
     def post(self, request, uidb64, token):
-        """
-        Verarbeitet die Passwort-Reset-Bestätigung
-        """
+        """Handles the confirmation of a password reset request"""
         try:
             user = self.get_user(uidb64)
 
