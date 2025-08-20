@@ -13,7 +13,7 @@ Registered users can stream videos across multiple categories using **HLS**, wit
 The backend is fully containerized with **Docker Compose** for seamless deployment and development.
 
 > 🔗 **[Frontend Repository (V1.0.0)](https://github.com/Developer-Akademie-Backendkurs/project.Videoflix)**  
-> 🔗 **Live Version:** Not available yet
+> 🔗 **Live Version:** Not available yet <br>
 > 📖 **[API-Dokumentation (Swagger)](https://cdn.developerakademie.com/courses/Backend/EndpointDoku/index.html?name=videoflix)**
 
 ---
