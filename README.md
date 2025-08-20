@@ -1,4 +1,4 @@
-# VideoFlix Backend
+# Videoflix Backend
 
 [![Python](https://img.shields.io/badge/Python-3.13.1-blue)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-5.2.4-green)](https://www.djangoproject.com/)
@@ -13,7 +13,8 @@ Registered users can stream videos across multiple categories using **HLS**, wit
 The backend is fully containerized with **Docker Compose** for seamless deployment and development.
 
 > 🔗 **[Frontend Repository (V1.0.0)](https://github.com/Developer-Akademie-Backendkurs/project.Videoflix)**  
-> 🔗 **Live Version:** Not available yet  
+> 🔗 **Live Version:** Not available yet
+> 📖 **[API-Dokumentation (Swagger)]([https://cdn.developerakademie.com/courses/Backend/EndpointDoku/index.html?name=videoflix])**
 
 ---
 
@@ -28,6 +29,7 @@ The backend is fully containerized with **Docker Compose** for seamless deployme
 - **Docker & Docker Compose** (for containerized deployment)
 
 ### Dependencies (from `requirements.txt`)
+```sh
 asgiref==3.9.0
 click==8.2.1
 colorama==0.4.6
@@ -55,6 +57,7 @@ rq==2.4.0
 sqlparse==0.5.3
 tzdata==2025.2
 whitenoise==6.9.0
+````
 
 ---
 
@@ -123,12 +126,6 @@ docker compose run --rm test
 
 ---
 
-## 📸 Screenshots
-
-(Screenshots will be added here in the future)
-
-<p align="center"> <img src=".github/videoflix_landing_page.JPG" alt="Landing Page" width="600"/> </p>
----
 
 ## 📝 License
 
@@ -143,3 +140,5 @@ For full details, see the [official license documentation](https://creativecommo
 ---
 
 ## 👩‍💻 Author
+
+Developed and maintained by [Anna](https://github.com/Anna-Fritz).
