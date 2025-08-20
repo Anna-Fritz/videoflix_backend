@@ -17,3 +17,8 @@ class VideoSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.thumbnail_url.url)
             return f"http://127.0.0.1:8000{obj.thumbnail_url.url}"
         return None
+
+    def validate_title(self, value):
+        if len(value.strip()) < 3:
+            raise serializers.ValidationError("The title must contain at least 3 characters.")
+        return value

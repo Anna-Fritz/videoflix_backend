@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import UniqueConstraint
+from django.db.models.functions import Lower
 from django.core.validators import FileExtensionValidator
 from .utils import video_upload_path, validate_video_size, thumbnail_upload_path
 
@@ -22,17 +24,17 @@ class Video(models.Model):
         ('failed', 'Failed'),
     ]
 
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    title = models.CharField(max_length=200, unique=True, blank=False, null=False)
+    description = models.TextField(blank=False, null=False)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, blank=False, null=False)
     original_video = models.FileField(
         upload_to=video_upload_path,
         validators=[
             FileExtensionValidator(allowed_extensions=['mp4', 'avi', 'mov', 'mkv']),
             validate_video_size
-        ]
+        ], blank=False, null=False
     )
-    thumbnail_url = models.ImageField(upload_to=thumbnail_upload_path, blank=True, null=True)
+    thumbnail_url = models.ImageField(upload_to=thumbnail_upload_path, blank=False, null=False)
     processing_status = models.CharField(max_length=20, choices=PROCESSING_STATUS, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -44,6 +46,9 @@ class Video(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        constraints = [
+            UniqueConstraint(Lower("title"), name="unique_title_case_insensitive")
+        ]
 
     def __str__(self):
         return self.title
