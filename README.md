@@ -3,6 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.13.1-blue)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-5.2.4-green)](https://www.djangoproject.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-7-red?logo=redis&logoColor=white)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue?logo=docker)](https://www.docker.com/)
 
 ## 📌 Project Description
@@ -26,6 +27,7 @@ The backend is fully containerized with **Docker Compose** for seamless deployme
 - **Django:** 5.2.4
 - **Django REST Framework:** 3.16.0
 - **Database:** PostgreSQL
+- **Redis** (runs via Docker in this setup)
 - **Docker & Docker Compose** (Docker Desktop required on Windows/Mac, Docker Engine on Linux)
 
 ### Dependencies (from `requirements.txt`)
