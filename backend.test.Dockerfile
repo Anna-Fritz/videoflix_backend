@@ -1,26 +1,24 @@
 FROM python:3.12-alpine
 
 LABEL version="1.0"
-LABEL description="Test-Image für pytest und coverage"
+LABEL description="Test image for pytest and coverage"
 
 WORKDIR /app
 
-COPY . .
+COPY requirements.txt .
 
 RUN apk update && \
     apk add --no-cache --upgrade bash postgresql-client ffmpeg && \
     apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
     pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
-    apk del .build-deps && \
-    chmod +x backend.entrypoint.sh
+    apk del .build-deps
 
-# Wait-for-it Script ins Image kopieren
-COPY /scripts/wait-for-it.sh /wait-for-it.sh
-RUN chmod +x /wait-for-it.sh
+COPY . .
 
-# Test Entrypoint
-COPY backend.test.entrypoint.sh /backend.test.entrypoint.sh
-RUN chmod +x /backend.test.entrypoint.sh
+RUN apk add --no-cache dos2unix bash && \
+    find . -type f -name "*.sh" -exec dos2unix {} \; && \
+    find . -type f -name "*.sh" -exec chmod +x {} \; && \
+    apk del dos2unix
 
-ENTRYPOINT ["/backend.test.entrypoint.sh"]
+ENTRYPOINT ["/app/backend.test.entrypoint.sh"]
