@@ -1,10 +1,11 @@
-import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
+
+import pytest
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIRequestFactory
 
-from ..models import Video
 from ..api.serializers import VideoSerializer
+from ..models import Video
 
 
 @pytest.mark.django_db

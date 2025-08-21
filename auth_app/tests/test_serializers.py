@@ -1,12 +1,15 @@
-import pytest
 from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import ValidationError, AuthenticationFailed
+
+import pytest
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
+
 from auth_app.api.serializers import (
-    RegistrationSerializer,
     CustomTokenObtainPairSerializer,
+    PasswordResetConfirmSerializer,
     PasswordResetSerializer,
-    PasswordResetConfirmSerializer
+    RegistrationSerializer,
 )
 
 User = get_user_model()
@@ -106,7 +109,6 @@ class TestRegistrationSerializer:
     @pytest.mark.django_db
     def test_registration_serializer_username_fallback(self):
         """Test username fallback for an already existing username."""
-        # Erstelle User mit Username 'testuser'
         User.objects.create_user(
             username='testuser',
             email='existing@example.com',
@@ -114,7 +116,7 @@ class TestRegistrationSerializer:
         )
 
         data = {
-            'email': 'testuser@newdomain.com',  # Würde 'testuser' als Username generieren
+            'email': 'testuser@newdomain.com',
             'password': 'validpassword123',
             'confirmed_password': 'validpassword123',
             'privacy_policy': 'on'
@@ -125,9 +127,8 @@ class TestRegistrationSerializer:
 
         user = serializer.save()
 
-        # Username sollte mit UUID-Suffix erweitert werden
         assert user.username.startswith('testuser_')
-        assert len(user.username) == len('testuser_') + 8  # 8 Zeichen UUID
+        assert len(user.username) == len('testuser_') + 8
         assert user.email == 'testuser@newdomain.com'
 
     @pytest.mark.django_db
@@ -136,7 +137,7 @@ class TestRegistrationSerializer:
         data = {
             'password': 'validpassword123',
             'confirmed_password': 'validpassword123',
-            # email und privacy_policy fehlen
+            # email und privacy_policy missing
         }
 
         serializer = RegistrationSerializer(data=data)
@@ -384,7 +385,7 @@ class TestSerializersEdgeCases:
 
         user = serializer.save()
         assert user.email == 'user+tag@example.com'
-        assert user.username == 'user+tag'  # Username wird aus E-Mail-Teil vor @ generiert
+        assert user.username == 'user+tag'  # Generates the username from the email prefix (before @).
 
     @pytest.mark.django_db
     def test_registration_with_unicode_email(self):
@@ -398,7 +399,7 @@ class TestSerializersEdgeCases:
 
         serializer = RegistrationSerializer(data=data)
 
-        # Wir erwarten, dass der Serializer NICHT valid ist
+        # The serializer is expected to be invalid.
         assert not serializer.is_valid()
         assert 'email' in serializer.errors
         assert any('valid email address' in str(e) for e in serializer.errors['email'])
@@ -420,16 +421,16 @@ class TestSerializersEdgeCases:
         data = {'email': '   '}
 
         serializer = PasswordResetSerializer(data=data)
-        # Nach strip() ist die E-Mail leer, sollte Validierungsfehler geben
+        # If the email is empty after strip(), a validation error should be raised.
         assert not serializer.is_valid()
 
     @pytest.mark.django_db
     @patch('uuid.uuid4')
     def test_registration_username_collision_with_uuid(self, mock_uuid):
         """Test username collision with a mocked UUID."""
-        mock_uuid.return_value.hex = 'abcd1234' * 4  # 32 Zeichen
+        mock_uuid.return_value.hex = 'abcd1234' * 4
 
-        # Erstelle bestehenden User
+        # Create an existing user.
         User.objects.create_user(
             username='collision',
             email='existing@example.com',

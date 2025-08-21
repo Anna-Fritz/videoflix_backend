@@ -1,22 +1,24 @@
 import os
-from django.http import HttpResponse
 from django.conf import settings
-from rest_framework import generics
+from django.http import HttpResponse
+
+from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
+
 from ..models import Video
 from .serializers import VideoSerializer
 
 
 class VideoListView(generics.ListAPIView):
-    """List all completed videos"""
+    """API endpoint to list all videos that have been processed and marked as completed."""
     queryset = Video.objects.filter(processing_status='completed')
     serializer_class = VideoSerializer
     permission_classes = [IsAuthenticated]
 
     def get_serializer_context(self):
+        """Adds the current request to the serializer context to allow building absolute URLs."""
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
@@ -58,7 +60,7 @@ def video_manifest(request, movie_id, resolution):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def video_segment(request, movie_id, resolution, segment):
-    """Serves a specific video segment (.ts) file for a completed video at the requested resolution."""
+    """Serve a specific video segment (.ts) file for a completed video at the requested resolution."""
     try:
         video = Video.objects.get(id=movie_id, processing_status='completed')
     except Video.DoesNotExist:

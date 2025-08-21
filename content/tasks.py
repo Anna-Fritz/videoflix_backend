@@ -1,9 +1,12 @@
 import os
 import subprocess
 import tempfile
+
 from django.conf import settings
 from django.core.files import File
+
 from django_rq import job
+
 from .models import Video
 
 
@@ -76,7 +79,7 @@ def process_video(video_id):
 
 
 def create_thumbnail(video, input_path):
-    """Create thumbnail of video"""
+    """Create thumbnail of video."""
     try:
         with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as temp_file:
             temp_thumbnail_path = temp_file.name

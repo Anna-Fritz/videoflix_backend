@@ -1,10 +1,12 @@
-import pytest
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
+
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
+from django.test import RequestFactory
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from django.test import RequestFactory
+
+import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.exceptions import TokenError

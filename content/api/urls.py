@@ -1,4 +1,5 @@
 from django.urls import path
+
 from .views import VideoListView, video_manifest, video_segment
 
 urlpatterns = [

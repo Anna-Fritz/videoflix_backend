@@ -1,10 +1,12 @@
-import pytest
-from unittest.mock import patch
-from django.contrib.auth.models import User
-from django.test import override_settings
-from django.template.exceptions import TemplateDoesNotExist
 from smtplib import SMTPException
+from unittest.mock import patch
+
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.template.exceptions import TemplateDoesNotExist
+from django.test import override_settings
+
+import pytest
 
 from auth_app.services.email_service import EmailService
 
