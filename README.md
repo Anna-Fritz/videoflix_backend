@@ -108,11 +108,9 @@ docker compose run --rm test
 
 This will:
 
-Run the test suite with pytest
-
-Generate a coverage report in the terminal
-
-Create a coverage.xml file in the project root (used for CI/CD and coverage badges)
+- Run the test suite with pytest
+- Generate a coverage report in the terminal
+- Create a coverage.xml file in the project root (used for CI/CD and coverage badges)
 
 
 ---
