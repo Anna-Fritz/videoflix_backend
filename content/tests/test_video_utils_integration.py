@@ -6,7 +6,7 @@ from ..models import Video
 
 
 class VideoValidatorTestCase(TestCase):
-    """Test cases for video file validators"""
+    """Test cases for video file validators."""
 
     def setUp(self):
         self.test_video_content = b'fake video content'
@@ -29,7 +29,7 @@ class VideoValidatorTestCase(TestCase):
             self.fail("validate_video_size raised ValidationError for valid file size")
 
     def test_validate_video_size_large_file(self):
-        """Test video size validator with oversized file"""
+        """Test video size validator with oversized file."""
         from ..utils import validate_video_size
 
         # Create a mock file that exceeds 10MB
@@ -50,7 +50,7 @@ class VideoValidatorTestCase(TestCase):
         self.assertIn("MB", error_message)  # Should show current size in MB
 
     def test_validate_video_size_exactly_max_size(self):
-        """Test video size validator with file exactly at max size"""
+        """Test video size validator with file exactly at max size."""
         from ..utils import validate_video_size
 
         # Create file exactly at 10.5MB (the actual limit)
@@ -68,7 +68,7 @@ class VideoValidatorTestCase(TestCase):
             self.fail("validate_video_size raised ValidationError for file at exact limit")
 
     def test_validate_video_size_just_over_limit(self):
-        """Test video size validator with file just over the limit"""
+        """Test video size validator with file just over the limit."""
         from ..utils import validate_video_size
 
         # Create file just over 10.5MB
@@ -87,7 +87,7 @@ class VideoValidatorTestCase(TestCase):
         self.assertIn("Die Datei ist zu groß", error_message)
 
     def test_video_creation_with_valid_size(self):
-        """Test creating video with valid file size"""
+        """Test creating video with valid file size."""
         small_file = SimpleUploadedFile(
             "valid_size.mp4",
             b'valid content',
@@ -105,7 +105,7 @@ class VideoValidatorTestCase(TestCase):
         self.assertIsNotNone(video.original_video)
 
     def test_video_creation_with_invalid_size(self):
-        """Test creating video with invalid file size"""
+        """Test creating video with invalid file size."""
         # Create oversized file
         large_content = b'x' * (11 * 1024 * 1024)  # 11MB
         large_file = SimpleUploadedFile(
@@ -132,7 +132,7 @@ class VideoValidatorTestCase(TestCase):
         self.assertIn("Die Datei ist zu groß", error_messages)
 
     def test_file_extension_validator_valid_extensions(self):
-        """Test file extension validation with valid extensions"""
+        """Test file extension validation with valid extensions."""
         valid_extensions = ['mp4', 'avi', 'mov', 'mkv']
 
         for ext in valid_extensions:
@@ -161,7 +161,7 @@ class VideoValidatorTestCase(TestCase):
                         self.assertNotIn('extension', error_messages.lower())
 
     def test_file_extension_validator_invalid_extension(self):
-        """Test file extension validation with invalid extension"""
+        """Test file extension validation with invalid extension."""
         invalid_file = SimpleUploadedFile(
             "test.txt",
             b'invalid content',
@@ -187,7 +187,7 @@ class VideoValidatorTestCase(TestCase):
         )
 
     def test_combined_file_validation(self):
-        """Test combined file size and extension validation"""
+        """Test combined file size and extension validation."""
         # Test file with valid extension but invalid size
         large_content = b'x' * (11 * 1024 * 1024)  # 11MB
         large_mp4_file = SimpleUploadedFile(

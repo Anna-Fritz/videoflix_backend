@@ -10,7 +10,7 @@ from content.models import Video
 
 
 class VideoModelPostgreSQLTestCase(TestCase):
-    """PostgreSQL specific test cases for Video model"""
+    """PostgreSQL specific test cases for Video model."""
 
     def setUp(self):
         """Set up test data"""
@@ -22,7 +22,7 @@ class VideoModelPostgreSQLTestCase(TestCase):
         )
 
     def test_postgresql_text_search(self):
-        """Test PostgreSQL full-text search capabilities (if implemented)"""
+        """Test PostgreSQL full-text search capabilities (if implemented)."""
         # Create videos with different descriptions
         Video.objects.create(
             title="Action Movie",
@@ -46,7 +46,7 @@ class VideoModelPostgreSQLTestCase(TestCase):
         self.assertEqual(comedy_videos.count(), 1)
 
     def test_concurrent_video_creation(self):
-        """Test concurrent video creation with PostgreSQL"""
+        """Test concurrent video creation with PostgreSQL."""
         from threading import Thread
         import queue
 
@@ -90,7 +90,7 @@ class VideoModelPostgreSQLTestCase(TestCase):
         self.assertEqual(Video.objects.count(), 3)
 
     def test_postgresql_transaction_rollback(self):
-        """Test transaction rollback behavior with PostgreSQL"""
+        """Test transaction rollback behavior with PostgreSQL."""
         initial_count = Video.objects.count()
 
         try:
@@ -112,7 +112,7 @@ class VideoModelPostgreSQLTestCase(TestCase):
 
     @patch('django.utils.timezone.now')
     def test_postgresql_timezone_handling(self, mock_now):
-        """Test timezone handling with PostgreSQL"""
+        """Test timezone handling with PostgreSQL."""
         from django.utils import timezone
         import datetime
 
@@ -140,6 +140,7 @@ class VideoModelPostgreSQLTestCase(TestCase):
 
 @pytest.mark.django_db
 def test_postgresql_unique_constraint_same_title():
+    """Test that creating two Video instances with the same title raises an IntegrityError due to the database unique constraint."""
     Video.objects.create(
         title="Unique Title",
         description="Test description",
@@ -160,6 +161,7 @@ def test_postgresql_unique_constraint_same_title():
 
 @pytest.mark.django_db
 def test_postgresql_unique_constraint_case_insensitive():
+    """Verifies that creating two Video instances with titles differing only in case raises an IntegrityError due to a case-insensitive unique constraint."""
     Video.objects.create(
         title="Unique Title",
         description="Test description",

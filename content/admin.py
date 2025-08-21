@@ -4,6 +4,14 @@ from .models import Video
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
+    """
+    Custom Django admin configuration for the Video model,
+
+    displaying key fields, filtering by category and processing status,
+
+    and marking generated video files and processing status as read-only.
+    """
+
     list_display = ['title', 'category', 'processing_status', 'created_at']
     list_filter = ['category', 'processing_status', 'created_at']
     search_fields = ['title', 'description', 'category']

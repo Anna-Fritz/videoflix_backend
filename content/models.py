@@ -6,6 +6,12 @@ from .utils import video_upload_path, validate_video_size, thumbnail_upload_path
 
 
 class Video(models.Model):
+    """
+    Represent a video entity with metadata, category, processing status, HLS output paths, thumbnail,
+
+    and automatic background processing upon creation, enforcing a case-insensitive unique title constraint.
+    """
+
     CATEGORY_CHOICES = [
         ('Action', 'Action'),
         ('Comedy', 'Comedy'),

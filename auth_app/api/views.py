@@ -1,28 +1,35 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
+
 from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.encoding import force_str
-from django.utils.http import urlsafe_base64_decode
-from django.http import Http404
-
-from .serializers import RegistrationSerializer, CustomTokenObtainPairSerializer, PasswordResetSerializer, PasswordResetConfirmSerializer
+from .serializers import (
+    CustomTokenObtainPairSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetSerializer,
+    RegistrationSerializer,
+)
 from ..services.email_service import EmailService
 
 User = get_user_model()
 
 
 class RegistrationView(APIView):
+    """API endpoint for registering a new user and sending a confirmation email with activation token."""
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """Handle user registration, saves the account, generates an activation token, and triggers a confirmation email."""
         serializer = RegistrationSerializer(data=request.data)
 
         data = {}
@@ -50,10 +57,7 @@ class RegistrationView(APIView):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def activate_account(request, uidb64, token):
-    """
-    Activates user account with token send by mail
-    URL: /api/activate/<uidb64>/<token>/
-    """
+    """Activate a user account via email verification token received in the activation link."""
     try:
         # decode user-ID from base64
         uid = force_str(urlsafe_base64_decode(uidb64))
@@ -83,10 +87,12 @@ def activate_account(request, uidb64, token):
 
 
 class CookieRefreshView(TokenRefreshView):
+    """API endpoint to refresh access tokens using a refresh token stored in cookies."""
     authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """Validate the refresh token from cookies, issues a new access token, and sets it in a secure cookie."""
         refresh_token = request.COOKIES.get("refresh_token")
         if refresh_token is None:
             return Response(
@@ -115,10 +121,12 @@ class CookieRefreshView(TokenRefreshView):
 
 
 class CookieEmailLoginView(TokenObtainPairView):
+    """API endpoint for user login using email and password with JWT stored in cookies."""
     permission_classes = [AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
+        """Authenticate user credentials and sets secure access and refresh tokens as cookies."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         refresh = serializer.validated_data["refresh"]
@@ -145,9 +153,11 @@ class CookieEmailLoginView(TokenObtainPairView):
 
 
 class LogoutView(APIView):
+    """API endpoint for logging out and invalidating the user’s refresh token."""
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """Blacklist the refresh token and removes authentication cookies to complete logout."""
         refresh_token = request.COOKIES.get('refresh_token')
 
         if refresh_token:
@@ -167,10 +177,11 @@ class LogoutView(APIView):
 
 
 class PasswordResetView(APIView):
-    """API Endpoint for sending password reset emails"""
+    """API endpoint for requesting a password reset via email."""
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """Validate the email and, if active, sends a password reset email (without disclosing existence of accounts)."""
         serializer = PasswordResetSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -196,12 +207,12 @@ class PasswordResetView(APIView):
 
 
 class PasswordResetConfirmView(APIView):
-    """Confirms the password change using the token contained in the email."""
+    """API endpoint for confirming a password reset and setting a new password."""
     permission_classes = [AllowAny]
     serializer_class = PasswordResetConfirmSerializer
 
     def get_user(self, uidb64):
-        """Decodes the uidb64 and returns the corresponding user."""
+        """Decode the uidb64 from the request and retrieves the corresponding user."""
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
 
@@ -211,12 +222,12 @@ class PasswordResetConfirmView(APIView):
         return user
 
     def validate_token(self, user, token):
-        """Checks whether the token is valid for the user."""
+        """Ensure the provided token is valid and not expired for the given user."""
         if not default_token_generator.check_token(user, token):
             raise Http404("Token invalid or expired.")
 
     def post(self, request, uidb64, token):
-        """Handles the confirmation of a password reset request"""
+        """Handle password reset confirmation by validating the token and updating the user's password."""
         try:
             user = self.get_user(uidb64)
 

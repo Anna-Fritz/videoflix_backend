@@ -10,7 +10,7 @@ from content.models import Video
 
 
 class VideoUtilsTestCase(TestCase):
-    """Test cases specifically for utils functions"""
+    """Test cases specifically for utils functions."""
 
     def setUp(self):
         # Dummy Dateien für Tests
@@ -22,7 +22,7 @@ class VideoUtilsTestCase(TestCase):
         )
 
     def test_video_upload_path_with_different_filenames(self):
-        """Test video_upload_path with various filenames"""
+        """Test video_upload_path with various filenames."""
         from ..utils import video_upload_path
 
         # Create a video instance
@@ -48,7 +48,7 @@ class VideoUtilsTestCase(TestCase):
                 self.assertEqual(actual_path, expected_path)
 
     def test_thumbnail_upload_path_consistency(self):
-        """Test that thumbnail_upload_path is consistent for same instance"""
+        """Test that thumbnail_upload_path is consistent for same instance."""
         from ..utils import thumbnail_upload_path
 
         # Test with saved video (has ID)
@@ -69,7 +69,7 @@ class VideoUtilsTestCase(TestCase):
         self.assertEqual(path1.rsplit('/', 1)[0], path3.rsplit('/', 1)[0])
 
     def test_thumbnail_upload_path_uuid_generation(self):
-        """Test UUID generation for new video instances"""
+        """Test UUID generation for new video instances."""
         from ..utils import thumbnail_upload_path
 
         # Create unsaved video instance (no ID)
@@ -98,7 +98,7 @@ class VideoUtilsTestCase(TestCase):
             self.fail("Generated UUIDs are not valid hex strings")
 
     def test_validate_video_size_edge_cases(self):
-        """Test edge cases for video size validation"""
+        """Test edge cases for video size validation."""
         from ..utils import validate_video_size
 
         # Test with empty file
@@ -117,7 +117,7 @@ class VideoUtilsTestCase(TestCase):
             self.fail("validate_video_size failed for file under limit")
 
     def test_validate_video_size_error_message_format(self):
-        """Test that error message contains proper formatting"""
+        """Test that error message contains proper formatting."""
         from ..utils import validate_video_size
         from django.core.files.uploadedfile import SimpleUploadedFile
         from django.core.exceptions import ValidationError
@@ -142,7 +142,7 @@ class VideoUtilsTestCase(TestCase):
         self.assertIn("12.0", error_message)
 
     def test_utils_with_unicode_filenames(self):
-        """Test utils functions with Unicode filenames"""
+        """Test utils functions with Unicode filenames."""
         from ..utils import video_upload_path, thumbnail_upload_path
 
         video = Video.objects.create(
@@ -172,7 +172,7 @@ class VideoUtilsTestCase(TestCase):
 
     @patch('content.tasks.process_video')
     def test_save_method_new_video_triggers_processing(self, mock_process_video):
-        """Test that save method triggers background processing for new videos"""
+        """Test that save method triggers background processing for new videos."""
         mock_task = Mock()
         mock_process_video.delay = Mock(return_value=mock_task)
 
@@ -190,7 +190,7 @@ class VideoUtilsTestCase(TestCase):
 
     @patch('content.tasks.process_video')
     def test_save_method_existing_video_no_processing(self, mock_process_video):
-        """Test that save method doesn't trigger processing for existing videos"""
+        """Test that save method doesn't trigger processing for existing videos."""
         mock_task = Mock()
         mock_process_video.delay = Mock(return_value=mock_task)
 
@@ -215,7 +215,7 @@ class VideoUtilsTestCase(TestCase):
 
     @patch('content.tasks.process_video')
     def test_save_method_new_video_without_file_no_processing(self, mock_process_video):
-        """Test that save method doesn't trigger processing if no video file"""
+        """Test that save method doesn't trigger processing if no video file."""
         mock_task = Mock()
         mock_process_video.delay = Mock(return_value=mock_task)
 
@@ -237,7 +237,7 @@ class VideoUtilsTestCase(TestCase):
         mock_process_video.delay.assert_called_once_with(video.id)
 
     def test_video_with_all_hls_paths(self):
-        """Test video creation with all HLS paths set"""
+        """Test video creation with all HLS paths set."""
         video = Video.objects.create(
             title="Test Video",
             description="Test description",
@@ -256,7 +256,7 @@ class VideoUtilsTestCase(TestCase):
         self.assertEqual(video.processing_status, "completed")
 
     def test_video_with_thumbnail(self):
-        """Test video creation with thumbnail (now required)"""
+        """Test video creation with thumbnail (now required)."""
         video = Video.objects.create(
             title="Test Video",
             description="Test description",
@@ -269,7 +269,7 @@ class VideoUtilsTestCase(TestCase):
         self.assertTrue(video.thumbnail_url.name.endswith('.jpg'))
 
     def test_unique_title_constraint(self):
-        """Test that titles must be unique"""
+        """Test that titles must be unique."""
         # Create first video
         Video.objects.create(
             title="Unique Title",
@@ -294,7 +294,7 @@ class VideoUtilsTestCase(TestCase):
             )
 
     def test_case_insensitive_title_constraint(self):
-        """Test that title uniqueness is case insensitive"""
+        """Test that title uniqueness is case insensitive."""
         # Create first video
         Video.objects.create(
             title="Test Title",
@@ -319,7 +319,7 @@ class VideoUtilsTestCase(TestCase):
             )
 
     def test_required_fields_validation(self):
-        """Test that all required fields must be provided"""
+        """Test that all required fields must be provided."""
         # Test missing title
         with self.assertRaises((ValidationError, IntegrityError, DbIntegrityError)):
             video = Video(
@@ -376,7 +376,7 @@ class VideoUtilsTestCase(TestCase):
             video.full_clean()
 
     def test_invalid_category_choice(self):
-        """Test that invalid category choices are handled by Django"""
+        """Test that invalid category choices are handled by Django."""
         # This test checks that Django will handle validation
         # In real usage, Django forms/serializers would validate this
         video = Video(
@@ -408,7 +408,7 @@ class VideoUtilsTestCase(TestCase):
             video.full_clean()
 
     def test_video_ordering(self):
-        """Test that videos are ordered by created_at descending"""
+        """Test that videos are ordered by created_at descending."""
         # Create multiple videos
         # PostgreSQL maintains microsecond precision, so we ensure different timestamps
         video1 = Video.objects.create(

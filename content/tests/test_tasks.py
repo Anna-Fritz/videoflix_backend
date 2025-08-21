@@ -102,6 +102,5 @@ def test_create_thumbnail_failure(video, tmp_path):
 
         create_thumbnail(video, str(fake_input))
 
-    # Thumbnail sollte leer bleiben
     video.refresh_from_db()
     assert not video.thumbnail_url

@@ -1,15 +1,18 @@
-from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+import re
+import uuid
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-import uuid
-import re
+
+from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
+    """Serializer for registering a new user with email, password confirmation, and privacy policy acceptance."""
     confirmed_password = serializers.CharField(write_only=True)
     privacy_policy = serializers.CharField(write_only=True)
 
@@ -26,13 +29,14 @@ class RegistrationSerializer(serializers.ModelSerializer):
         }
 
     def validate_confirmed_password(self, value):
+        """Ensure the confirmed password matches the original password."""
         password = self.initial_data.get('password')
         if password and value and password != value:
             raise serializers.ValidationError('Passwords do not match')
         return value
 
     def validate_email(self, value):
-        # ASCII-only validation
+        """Validate that the email contains only ASCII characters and is unique."""
         if not re.match(r'^[\x00-\x7F]+$', value):
             raise serializers.ValidationError('Unicode characters in email are not allowed')
 
@@ -41,11 +45,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return value
 
     def validate_privacy_policy(self, value):
+        """Check that the privacy policy has been explicitly accepted."""
         if value != "on":
             raise serializers.ValidationError('Privacy policy must be accepted')
         return value
 
     def save(self):
+        """Create a new inactive user account with a unique username and hashed password."""
         pw = self.validated_data['password']
         email = self.validated_data['email']
         username = email.split('@')[0]
@@ -61,6 +67,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Custom JWT serializer authenticating users via email and password instead of username."""
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
@@ -71,6 +78,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             self.fields.pop("username")
 
     def validate(self, attrs):
+        """Normalize the email address by lowercasing and trimming whitespace."""
         email = attrs.get('email')
         password = attrs.get('password')
 
@@ -94,16 +102,16 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class PasswordResetSerializer(serializers.Serializer):
+    """Serializer for initiating a password reset request via email."""
     email = serializers.EmailField()
 
     def validate_email(self, value):
-        """
-        Email validation
-        """
+        """Normalize the email address by lowercasing and trimming whitespace."""
         return value.lower().strip()
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Serializer for confirming and setting a new user password."""
     new_password = serializers.CharField(
         write_only=True,
         min_length=8,
@@ -115,7 +123,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     )
 
     def validate_new_password(self, value):
-        """Validiert das neue Passwort mit Django's Standard-Validatoren"""
+        """Validate the new password against Django's standard password policies."""
         try:
             validate_password(value)
         except ValidationError as e:
@@ -123,7 +131,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         return value
 
     def validate(self, attrs):
-        """Überprüft ob beide Passwörter übereinstimmen"""
+        """Ensure the new password and confirmation password match."""
         if attrs['new_password'] != attrs['confirm_password']:
             raise serializers.ValidationError({
                 'confirm_password': 'Die Passwörter stimmen nicht überein.'
@@ -131,7 +139,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         return attrs
 
     def save(self, user):
-        """Setzt das neue Passwort für den Benutzer"""
+        """Update the user’s password with the newly validated one."""
         password = self.validated_data['new_password']
         user.set_password(password)
         user.save()
