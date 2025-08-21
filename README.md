@@ -24,41 +24,32 @@ The backend is fully containerized with **Docker Compose** for seamless deployme
 ### System Requirements
 
 - **Python:** 3.13.1
-- **Django:** 5.2.4
-- **Django REST Framework:** 3.16.0
 - **Database:** PostgreSQL
 - **Redis** (runs via Docker in this setup)
 - **Docker & Docker Compose** (Docker Desktop required on Windows/Mac, Docker Engine on Linux)
 
 ### Dependencies (from `requirements.txt`)
 ```sh
-asgiref==3.9.0
-click==8.2.1
-colorama==0.4.6
-coverage==7.10.3
 Django==5.2.4
+djangorestframework==3.16.0
+djangorestframework-simplejwt==5.5.0
+psycopg2-binary==2.9.10
+gunicorn==23.0.0
+pillow==11.3.0
 django-cors-headers==4.7.0
 django-redis==6.0.0
 django-rq==3.0.1
-djangorestframework==3.16.0
-djangorestframework_simplejwt==5.5.0
-gunicorn==23.0.0
-iniconfig==2.1.0
-packaging==25.0
-pillow==11.3.0
-pluggy==1.6.0
-psycopg2-binary==2.9.10
-Pygments==2.19.2
-PyJWT==2.9.0
-pytest==8.4.1
-pytest-cov==6.2.1
-pytest-django==4.11.1
-python-dotenv==1.1.1
 redis==6.2.0
 rq==2.4.0
-sqlparse==0.5.3
-tzdata==2025.2
-whitenoise==6.9.0
+
+# Test & Coverage
+pytest==8.4.1
+pytest-django==4.11.1
+pytest-cov==6.2.1
+coverage==7.10.3
+
+# Environment
+python-dotenv==1.1.1
 ````
 
 ---
