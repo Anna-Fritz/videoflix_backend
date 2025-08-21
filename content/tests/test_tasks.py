@@ -26,7 +26,7 @@ def test_process_video_success(video, tmp_path, settings):
     settings.MEDIA_ROOT = tmp_path
 
     media_input_dir = tmp_path / "videos" / "original"
-    media_input_dir.mkdir(parents=True)
+    media_input_dir.mkdir(parents=True, exist_ok=True)
     input_file = media_input_dir / "input.mp4"
     input_file.write_text("dummy video content")
 
