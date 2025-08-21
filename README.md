@@ -41,6 +41,7 @@ django-redis==6.0.0
 django-rq==3.0.1
 redis==6.2.0
 rq==2.4.0
+whitenoise==6.9.0
 
 # Test & Coverage
 pytest==8.4.1
