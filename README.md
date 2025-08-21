@@ -8,7 +8,7 @@
 
 ## 📌 Project Description
 
-The **VideoFlix Backend** powers the **VideoFlix** video streaming platform, inspired by Netflix.  
+The **Videoflix Backend** powers the **Videoflix** video streaming platform, inspired by Netflix.  
 Registered users can stream videos across multiple categories using **HLS**, with videos available in multiple resolutions. Admin users can manage the video library and platform content through a dedicated admin panel.  
 
 The backend is fully containerized with **Docker Compose** for seamless deployment and development.
