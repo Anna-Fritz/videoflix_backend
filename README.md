@@ -26,7 +26,7 @@ The backend is fully containerized with **Docker Compose** for seamless deployme
 - **Django:** 5.2.4
 - **Django REST Framework:** 3.16.0
 - **Database:** PostgreSQL
-- **Docker & Docker Compose** (for containerized deployment)
+- **Docker & Docker Compose** (Docker Desktop required on Windows/Mac, Docker Engine on Linux)
 
 ### Dependencies (from `requirements.txt`)
 ```sh
@@ -105,24 +105,22 @@ This project uses **Docker Compose** for easy deployment. Containers include:
 
 ---
 
-## 📂 Database & Migrations
-
-- Database Technology: PostgreSQL
-
-- Environment Variables: Configured via .env (see .env.template)
-
-- Run Migrations Manually (if needed):
-  ```sh
-  docker compose run --rm web python manage.py migrate
-
----
 
 ## 🧪 Running Tests
 
-Tests are executed with pytest and coverage reporting. Using Docker:
+Tests are executed with **pytest** and coverage reporting inside the `test` container:
 ```sh
 docker compose run --rm test
 ````
+
+This will:
+
+Run the test suite with pytest
+
+Generate a coverage report in the terminal
+
+Create a coverage.xml file in the project root (used for CI/CD and coverage badges)
+
 
 ---
 
