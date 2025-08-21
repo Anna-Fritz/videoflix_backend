@@ -30,25 +30,33 @@ The backend is fully containerized with **Docker Compose** for seamless deployme
 
 ### Dependencies (from `requirements.txt`)
 ```sh
+# Core Frameworks
 Django==5.2.4
 djangorestframework==3.16.0
 djangorestframework-simplejwt==5.5.0
-psycopg2-binary==2.9.10
-gunicorn==23.0.0
-pillow==11.3.0
-django-cors-headers==4.7.0
-django-redis==6.0.0
-django-rq==3.0.1
-redis==6.2.0
-rq==2.4.0
 
-# Test & Coverage
+# Database & Caching
+psycopg2-binary==2.9.10
+django-redis==6.0.0
+redis==6.2.0
+django-rq==3.0.1
+rq==2.4.0 
+
+# Server & Static Files
+gunicorn==23.0.0
+whitenoise==6.9.0
+django-cors-headers==4.7.0
+
+# Media Handling
+pillow==11.3.0
+
+# Testing & Coverage
 pytest==8.4.1
 pytest-django==4.11.1
 pytest-cov==6.2.1
 coverage==7.10.3
 
-# Environment
+# Environment & Utilities
 python-dotenv==1.1.1
 ````
 
