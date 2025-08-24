@@ -10,7 +10,7 @@ from django_rq import job
 from .models import Video
 
 
-@job
+@job("default", timeout=7200)
 def process_video(video_id):
     """Executes a background task to process videos using FFmpeg."""
     try:
