@@ -15,8 +15,7 @@ RUN apk update && \
     pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     apk del .build-deps && \
-    chmod +x backend.entrypoint.sh
+    chmod +x backend.entrypoint.sh && \
+    chmod +x entrypoint.worker.sh
 
 EXPOSE 8000
-
-ENTRYPOINT [ "./backend.entrypoint.sh" ]

@@ -9,7 +9,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init/:/docker-entrypoint-initdb.d/ 
 
   redis:
     image: redis:latest
@@ -21,6 +20,7 @@ services:
     build:
       context: .
       dockerfile: backend.Dockerfile
+    image: videoflix-backend:latest
     env_file: .env
     container_name: videoflix_backend
     volumes:
@@ -32,33 +32,20 @@ services:
     depends_on:
       - db
       - redis
-  
-  test:
-    build:
-      context: .
-      dockerfile: backend.test.Dockerfile 
+    command: ./backend.entrypoint.sh
+
+  worker:
+    image: videoflix-backend:latest
+    env_file: .env
+    container_name: videoflix_worker
     volumes:
       - .:/app
+      - videoflix_media:/app/media
+      - videoflix_static:/app/static
     depends_on:
       - db
       - redis
-    environment:
-      - DJANGO_SETTINGS_MODULE=core.settings_test
-      - POSTGRES_DB=app_test
-      - POSTGRES_USER=app_user
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_URL=redis://redis:6379/2
-    command:
-      - pytest
-      - --disable-warnings
-      - --maxfail=1
-      - --cov=videoflix_backend
-      - --cov-report=term-missing
-      - --cov-report=xml
+    command: ./entrypoint.worker.sh
 
 
 volumes:
