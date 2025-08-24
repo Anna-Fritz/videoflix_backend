@@ -93,9 +93,10 @@ This project uses **Docker Compose** for easy deployment. Containers include:
    ```sh
    cp .env.template .env
 
-5. Start all containers (including DB, Redis, and Django backend):
+5. Build and start all containers (including DB, Redis, and Django backend):
    ```sh
-   docker compose up db redis web
+   docker compose build db redis web
+   docker compose up
    ```
 
    This will also run migrations automatically for the backend.
