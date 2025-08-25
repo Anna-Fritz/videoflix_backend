@@ -2,6 +2,8 @@ from django.db import models
 from django.db.models import UniqueConstraint
 from django.db.models.functions import Lower
 from django.core.validators import FileExtensionValidator
+from django_rq import get_queue
+
 from .utils import video_upload_path, validate_video_size, thumbnail_upload_path
 
 
@@ -66,4 +68,5 @@ class Video(models.Model):
         # start background processing only for new videos
         if is_new and self.original_video:
             from .tasks import process_video
-            process_video.delay(self.id)
+            queue = get_queue("default")
+            queue.enqueue(process_video, self.id)
