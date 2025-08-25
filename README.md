@@ -69,6 +69,7 @@ This project uses **Docker Compose** for easy deployment. Containers include:
 - `db` → PostgreSQL
 - `redis` → Redis server
 - `web` → Django backend running with Gunicorn
+- `worker` → Django-RQ worker for processing background jobs
 - `test` → Container for running tests with pytest and coverage
 
 ---
@@ -93,10 +94,10 @@ This project uses **Docker Compose** for easy deployment. Containers include:
    ```sh
    cp .env.template .env
 
-5. Build and start all containers (including DB, Redis, and Django backend):
+5. Build web container first, then start all containers (including DB, Redis, Django backend, and Django-RQ worker):
    ```sh
-   docker compose build db redis web
-   docker compose up
+   docker compose build web
+   docker compose up web db redis worker
    ```
 
    This will also run migrations automatically for the backend.
