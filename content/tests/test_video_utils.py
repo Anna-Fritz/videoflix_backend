@@ -13,7 +13,6 @@ class VideoUtilsTestCase(TestCase):
     """Test cases specifically for utils functions."""
 
     def setUp(self):
-        # Dummy Dateien für Tests
         self.test_video_file = SimpleUploadedFile(
             "test.mp4", b"file_content", content_type="video/mp4"
         )
@@ -25,7 +24,6 @@ class VideoUtilsTestCase(TestCase):
         """Test video_upload_path with various filenames."""
         from ..utils import video_upload_path
 
-        # Create a video instance
         video = Video.objects.create(
             title="Path Test Video",
             description="Testing upload paths",
@@ -170,31 +168,13 @@ class VideoUtilsTestCase(TestCase):
                 self.assertTrue(video_path.startswith('videos/original/'))
                 self.assertTrue(thumb_path.startswith('videos/thumbnails/'))
 
-    @patch('content.tasks.process_video')
-    def test_save_method_new_video_triggers_processing(self, mock_process_video):
-        """Test that save method triggers background processing for new videos."""
-        mock_task = Mock()
-        mock_process_video.delay = Mock(return_value=mock_task)
+    @patch("content.models.get_queue")
+    def test_save_method_new_video_triggers_processing(self, mock_get_queue):
+        # Mock for the queue
+        mock_queue = Mock()
+        mock_get_queue.return_value = mock_queue
 
-        video = Video(
-            title="Test Video",
-            description="Test description",
-            category="Action",
-            original_video=self.test_video_file,
-            thumbnail_url=self.test_thumbnail_file
-        )
-        video.save()
-
-        # Should trigger background processing for new video
-        mock_process_video.delay.assert_called_once_with(video.id)
-
-    @patch('content.tasks.process_video')
-    def test_save_method_existing_video_no_processing(self, mock_process_video):
-        """Test that save method doesn't trigger processing for existing videos."""
-        mock_task = Mock()
-        mock_process_video.delay = Mock(return_value=mock_task)
-
-        # Create video first
+        # Save new video
         video = Video.objects.create(
             title="Test Video",
             description="Test description",
@@ -203,27 +183,52 @@ class VideoUtilsTestCase(TestCase):
             thumbnail_url=self.test_thumbnail_file
         )
 
-        # Reset mock call count
-        mock_process_video.delay.reset_mock()
+        # Check if enqueue is called
+        self.assertEqual(mock_queue.enqueue.call_count, 1)
+        called_args, called_kwargs = mock_queue.enqueue.call_args
+        self.assertEqual(called_args[1], video.id)
+        self.assertTrue(callable(called_args[0]))
 
-        # Update existing video
-        video.title = "Updated Title"
+    @patch("content.models.get_queue")
+    def test_save_method_existing_video_no_processing(self, mock_get_queue):
+        # Mock for the queue
+        mock_queue = Mock()
+        mock_get_queue.return_value = mock_queue
+
+        # Step 1: Create video (Mock active!)
+        video = Video.objects.create(
+            title="Test Video",
+            description="Test description",
+            category="Action",
+            original_video=self.test_video_file,
+            thumbnail_url=self.test_thumbnail_file
+        )
+
+        # Step 2: Save video again (is_new = False)
         video.save()
 
-        # Should not trigger background processing for existing video
-        mock_process_video.delay.assert_not_called()
+        # Ensure enqueue was called only the first time
+        self.assertEqual(mock_queue.enqueue.call_count, 1)
 
-    @patch('content.tasks.process_video')
-    def test_save_method_new_video_without_file_no_processing(self, mock_process_video):
-        """Test that save method doesn't trigger processing if no video file."""
-        mock_task = Mock()
-        mock_process_video.delay = Mock(return_value=mock_task)
+        # Optional: Check that nothing happens on the second save
+        # For this: examine the call list
+        last_call_args = mock_queue.enqueue.call_args_list[-1]
+        self.assertEqual(last_call_args[0][1], video.id)  # ID matches
 
-        # This test is no longer valid since original_video is now required
-        # But we can test with a minimal file
-        minimal_video = SimpleUploadedFile("minimal.mp4", b'x', "video/mp4")
-        minimal_thumb = SimpleUploadedFile("minimal.jpg", b'x', "image/jpeg")
+        # Use variable to avoid linter warning
+        self.assertIsNotNone(video.id)
 
+    @patch("content.models.get_queue")
+    def test_save_method_new_video_without_file_no_processing(self, mock_get_queue):
+        # Mock for the queue
+        mock_queue = Mock()
+        mock_get_queue.return_value = mock_queue
+
+        # Minimal video
+        minimal_video = SimpleUploadedFile("minimal.mp4", b"x", content_type="video/mp4")
+        minimal_thumb = SimpleUploadedFile("minimal.jpg", b"x", content_type="image/jpeg")
+
+        # Create video
         video = Video(
             title="Test Video",
             description="Test description",
@@ -233,27 +238,32 @@ class VideoUtilsTestCase(TestCase):
         )
         video.save()
 
-        # Should trigger processing since video file is present
-        mock_process_video.delay.assert_called_once_with(video.id)
+        # Check that enqueue was called since original_video is set
+        self.assertEqual(mock_queue.enqueue.call_count, 1)
 
-    def test_video_with_all_hls_paths(self):
-        """Test video creation with all HLS paths set."""
-        video = Video.objects.create(
-            title="Test Video",
-            description="Test description",
-            category="Action",
-            original_video=self.test_video_file,
-            thumbnail_url=self.test_thumbnail_file,
-            hls_480p_path="/path/to/480p.m3u8",
-            hls_720p_path="/path/to/720p.m3u8",
-            hls_1080p_path="/path/to/1080p.m3u8",
-            processing_status="completed"
-        )
+        # Check arguments
+        called_args, called_kwargs = mock_queue.enqueue.call_args
+        self.assertEqual(called_args[1], video.id)
+        self.assertTrue(callable(called_args[0]))
 
-        self.assertEqual(video.hls_480p_path, "/path/to/480p.m3u8")
-        self.assertEqual(video.hls_720p_path, "/path/to/720p.m3u8")
-        self.assertEqual(video.hls_1080p_path, "/path/to/1080p.m3u8")
-        self.assertEqual(video.processing_status, "completed")
+        def test_video_with_all_hls_paths(self):
+            """Test video creation with all HLS paths set."""
+            video = Video.objects.create(
+                title="Test Video",
+                description="Test description",
+                category="Action",
+                original_video=self.test_video_file,
+                thumbnail_url=self.test_thumbnail_file,
+                hls_480p_path="/path/to/480p.m3u8",
+                hls_720p_path="/path/to/720p.m3u8",
+                hls_1080p_path="/path/to/1080p.m3u8",
+                processing_status="completed"
+            )
+
+            self.assertEqual(video.hls_480p_path, "/path/to/480p.m3u8")
+            self.assertEqual(video.hls_720p_path, "/path/to/720p.m3u8")
+            self.assertEqual(video.hls_1080p_path, "/path/to/1080p.m3u8")
+            self.assertEqual(video.processing_status, "completed")
 
     def test_video_with_thumbnail(self):
         """Test video creation with thumbnail (now required)."""
