@@ -25,12 +25,12 @@ jobs:
 
       - name: Build test image
         run: |
+          REPO=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
           docker build -f ./backend/backend.test.Dockerfile \
-                       -t ghcr.io/${{ github.repository }}/backend-test:latest \
-                       ./backend
+            -t ghcr.io/$REPO/backend-test:latest ./backend
 
       - name: Push test image
-        run: docker push ghcr.io/${{ github.repository }}/backend-test:latest
+        run: docker push ghcr.io/$REPO/backend-test:latest
 
       - name: Create .env.test file
         run: echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.test
