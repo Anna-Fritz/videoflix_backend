@@ -1,0 +1,28 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  test:
+    name: Run Django tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Create .env.test file
+        run: |
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.test
+
+      - name: Run test container
+        run: docker compose run --rm test
+
+      - name: Clean up
+        run: docker compose down -v
