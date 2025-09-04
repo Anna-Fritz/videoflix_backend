@@ -35,4 +35,4 @@ jobs:
         run: echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.test
 
       - name: Run test container
-        run: docker run --rm --env-file .env.test ghcr.io/${{ github.repository }}/backend-test:latest
+        run: docker run --rm --env-file .env.test ghcr.io/anna-fritz/videoflix-backend/backend-test:latest
