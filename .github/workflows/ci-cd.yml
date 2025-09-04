@@ -25,12 +25,11 @@ jobs:
 
       - name: Build test image
         run: |
-          REPO=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]' | tr '_' '-')
           docker build -f backend.test.Dockerfile \
-            -t ghcr.io/$REPO/backend-test:latest .
+            -t ghcr.io/anna-fritz/videoflix-backend/backend-test:latest .
 
       - name: Push test image
-        run: docker push ghcr.io/$REPO/backend-test:latest
+        run: docker push ghcr.io/anna-fritz/videoflix-backend/backend-test:latest
 
       - name: Create .env.test file
         run: echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.test
