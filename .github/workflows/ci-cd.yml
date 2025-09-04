@@ -22,7 +22,7 @@ jobs:
           echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.test
 
       - name: Run test container
-        run: docker compose run --rm test
+        run: docker compose run --rm --no-deps test
 
       - name: Clean up
         run: docker compose down -v
