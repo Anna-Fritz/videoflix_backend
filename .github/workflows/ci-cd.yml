@@ -9,20 +9,31 @@ on:
       - '**'
 
 jobs:
-  test:
-    name: Run Django tests
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Create .env.test file
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build test image
         run: |
-          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.test
+          docker build -f ./backend/backend.test.Dockerfile \
+                       -t ghcr.io/${{ github.repository }}/backend-test:latest \
+                       ./backend
+
+      - name: Push test image
+        run: docker push ghcr.io/${{ github.repository }}/backend-test:latest
+
+      - name: Create .env.test file
+        run: echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.test
 
       - name: Run test container
-        run: docker compose run --rm --no-deps test
-
-      - name: Clean up
-        run: docker compose down -v
+        run: docker run --rm --env-file .env.test ghcr.io/${{ github.repository }}/backend-test:latest
