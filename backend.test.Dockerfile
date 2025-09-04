@@ -19,6 +19,7 @@ COPY . .
 RUN apk add --no-cache dos2unix bash && \
     find . -type f -name "*.sh" -exec dos2unix {} \; && \
     find . -type f -name "*.sh" -exec chmod +x {} \; && \
-    apk del dos2unix
+    apk del dos2unix && \
+    chmod +x /app/backend.test.entrypoint.sh
 
 ENTRYPOINT ["/app/backend.test.entrypoint.sh"]
