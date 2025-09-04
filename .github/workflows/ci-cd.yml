@@ -26,8 +26,8 @@ jobs:
       - name: Build test image
         run: |
           REPO=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
-          docker build -f ./backend/backend.test.Dockerfile \
-            -t ghcr.io/$REPO/backend-test:latest ./backend
+          docker build -f videoflix_backend/backend.test.Dockerfile \
+            -t ghcr.io/$REPO/backend-test:latest videoflix_backend
 
       - name: Push test image
         run: docker push ghcr.io/$REPO/backend-test:latest
