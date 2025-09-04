@@ -32,7 +32,12 @@ jobs:
         run: docker push ghcr.io/anna-fritz/videoflix-backend/backend-test:latest
 
       - name: Create .env.test file
-        run: echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.test
+        run: |
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.test
+          echo "POSTGRES_HOST=db" >> .env.test
+          echo "POSTGRES_PORT=5432" >> .env.test
+          echo "REDIS_HOST=redis" >> .env.test
+          echo "REDIS_PORT=6379" >> .env.test
 
       - name: Run test container
         run: docker run --rm --env-file .env.test ghcr.io/anna-fritz/videoflix-backend/backend-test:latest
