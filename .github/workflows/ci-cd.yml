@@ -32,7 +32,7 @@ jobs:
         run: docker push ghcr.io/anna-fritz/videoflix-backend/backend-test:latest
 
       - name: Run test container
-        run: |
-          TEST_IMAGE=ghcr.io/anna-fritz/videoflix-backend/backend-test:latest \
-          SECRET_KEY=${{ secrets.SECRET_KEY }} \
-          docker compose run --rm test
+        env:
+          TEST_IMAGE: ghcr.io/anna-fritz/videoflix-backend/backend-test:latest
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: docker compose run --rm test
