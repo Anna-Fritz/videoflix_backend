@@ -50,6 +50,7 @@ services:
     command: ./entrypoint.worker.sh
 
   test:
+    image: ${TEST_IMAGE:-videoflix-backend-test:local}
     build:
       context: .
       dockerfile: backend.test.Dockerfile 

@@ -40,4 +40,6 @@ jobs:
           echo "REDIS_PORT=6379" >> .env.test
 
       - name: Run test container
-        run: docker run --rm --env-file .env.test ghcr.io/anna-fritz/videoflix-backend/backend-test:latest
+        run: |
+          TEST_IMAGE=ghcr.io/anna-fritz/videoflix-backend/backend-test:latest
+          docker compose run --rm --env-file .env.test test
