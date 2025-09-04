@@ -25,7 +25,7 @@ jobs:
 
       - name: Build test image
         run: |
-          REPO=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
+          REPO=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]' | tr '_' '-')
           docker build -f backend.test.Dockerfile \
             -t ghcr.io/$REPO/backend-test:latest .
 
