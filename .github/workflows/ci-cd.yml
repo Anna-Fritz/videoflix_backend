@@ -37,5 +37,5 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
           docker compose up -d db redis
-          docker compose run --rm --network videoflix_backend_default test
+          docker compose run --rm test
           docker compose down -v
