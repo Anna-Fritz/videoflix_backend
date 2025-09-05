@@ -30,7 +30,6 @@ LOGGING = {
 
 REDIS_URL = 'redis://redis:6379/2'
 
-
 CACHES = {
     "default":
         {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
