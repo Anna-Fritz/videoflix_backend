@@ -35,4 +35,7 @@ jobs:
         env:
           TEST_IMAGE: ghcr.io/anna-fritz/videoflix-backend/backend-test:latest
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        run: docker compose run --rm test
+        run: |
+          docker compose up -d db redis
+          docker compose run --rm --network videoflix_backend_default test
+          docker compose down -v
