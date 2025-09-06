@@ -36,6 +36,5 @@ jobs:
           TEST_IMAGE: ghcr.io/anna-fritz/videoflix-backend/backend-test:latest
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
-          docker compose up -d db redis
-          docker compose run --rm test
+          docker compose up --abort-on-container-exit --build db redis test
           docker compose down -v
