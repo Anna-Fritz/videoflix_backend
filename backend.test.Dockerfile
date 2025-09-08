@@ -22,4 +22,4 @@ RUN apk add --no-cache dos2unix bash && \
     apk del dos2unix && \
     chmod +x /app/backend.test.entrypoint.sh
 
-ENTRYPOINT ["/app/backend.test.entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/app/backend.test.entrypoint.sh"]
