@@ -21,4 +21,7 @@ RUN apk add --no-cache dos2unix bash && \
     find . -type f -name "*.sh" -exec chmod +x {} \; && \
     apk del dos2unix
 
+COPY scripts/wait-for-it.sh /app/scripts/wait-for-it.sh
+RUN dos2unix /app/scripts/wait-for-it.sh && chmod +x /app/scripts/wait-for-it.sh
+
 ENTRYPOINT ["/bin/sh", "/app/backend.test.entrypoint.sh"]
