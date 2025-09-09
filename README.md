@@ -97,7 +97,7 @@ This project uses **Docker Compose** for easy deployment. Containers include:
 5. Build web container first, then start all containers (including DB, Redis, Django backend, and Django-RQ worker):
    ```sh
    docker compose build web
-   docker compose up web db redis worker
+   docker compose up
    ```
 
    This will also run migrations automatically for the backend.
@@ -113,7 +113,7 @@ This project uses **Docker Compose** for easy deployment. Containers include:
 
 Tests are executed with **pytest** and coverage reporting inside the `test` container:
 ```sh
-docker compose run --rm test
+docker compose -f docker-compose.test.yml up
 ````
 
 This will:
