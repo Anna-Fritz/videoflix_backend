@@ -34,7 +34,7 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
 
-SITE_URL = 'http://localhost:5500'
+SITE_URL = os.environ.get("SITE_URL", default="http://localhost:5500")
 SITE_NAME = 'Videoflix'
 
 
