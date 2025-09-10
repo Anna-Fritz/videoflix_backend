@@ -24,7 +24,6 @@ services:
     env_file: .env
     container_name: videoflix_backend
     volumes:
-      - .:/app
       - videoflix_media:/app/media
       - videoflix_static:/app/static
     ports:
@@ -39,7 +38,6 @@ services:
     env_file: .env
     container_name: videoflix_worker
     volumes:
-      - .:/app
       - videoflix_media:/app/media
       - videoflix_static:/app/static
     depends_on:
