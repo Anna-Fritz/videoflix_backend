@@ -1,8 +1,11 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.conf import settings
+
 
 import pytest
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIRequestFactory
+from urllib.parse import urljoin
 
 from ..api.serializers import VideoSerializer
 from ..models import Video
@@ -40,7 +43,6 @@ class TestVideoSerializer:
         assert data["thumbnail_url"].startswith("http://testserver/")
 
     def test_get_thumbnail_url_without_request(self):
-        """Checks that the thumbnail URL falls back to the default host when no request context is given."""
         video = Video.objects.create(
             title="Test Video 2",
             description="desc",
@@ -49,9 +51,11 @@ class TestVideoSerializer:
             thumbnail_url=SimpleUploadedFile("thumb2.jpg", b"file_content"),
         )
 
-        serializer = VideoSerializer(video)  # kein request im Kontext
+        serializer = VideoSerializer(video)  # kein request
         data = serializer.data
-        assert data["thumbnail_url"].startswith("http://127.0.0.1:8000/")
+
+        expected_url = urljoin(settings.MEDIA_URL, video.thumbnail_url.name)
+        assert data["thumbnail_url"] == expected_url
 
     def test_get_thumbnail_url_none(self):
         """Ensures that the thumbnail URL is None if no thumbnail is set."""
