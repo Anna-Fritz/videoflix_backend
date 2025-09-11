@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.conf import settings
+from urllib.parse import urljoin
 
 from ..models import Video
 
@@ -17,7 +19,7 @@ class VideoSerializer(serializers.ModelSerializer):
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.thumbnail_url.url)
-            return f"http://127.0.0.1:8000{obj.thumbnail_url.url}"
+            return urljoin(settings.MEDIA_URL, obj.thumbnail_url.url)
         return None
 
     def validate_title(self, value):
