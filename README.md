@@ -113,7 +113,8 @@ This project uses **Docker Compose** for easy deployment. Containers include:
 
 Tests are executed with **pytest** and coverage reporting inside the `test` container:
 ```sh
-docker compose -f docker-compose.test.yml up
+docker compose -f docker-compose.test.yml up --abort-on-container-exit
+docker compose -f docker-compose.test.yml down
 ````
 
 This will:
@@ -121,6 +122,7 @@ This will:
 - Run the test suite with pytest
 - Generate a coverage report in the terminal
 - Create a coverage.xml file in the project root (used for CI/CD and coverage badges)
+- Remove test container (second command)
 
 
 ---
