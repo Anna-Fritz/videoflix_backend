@@ -115,7 +115,8 @@ class CookieRefreshView(TokenRefreshView):
             httponly=True,
             secure=True,   # always True in production
             samesite="None",
-            path="/"
+            path="/",
+            domain=".annafritz.de"
         )
         return response
 
@@ -139,7 +140,8 @@ class CookieEmailLoginView(TokenObtainPairView):
             httponly=True,
             secure=True,   # always True in production, better safe in .env
             samesite="None",
-            path="/"
+            path="/",
+            domain=".annafritz.de"
         )
         response.set_cookie(
             key="refresh_token",
@@ -147,7 +149,8 @@ class CookieEmailLoginView(TokenObtainPairView):
             httponly=True,
             secure=True,   # always True in production, better safe in .env
             samesite="None",
-            path="/"
+            path="/",
+            domain=".annafritz.de"
         )
         return response
 
@@ -171,8 +174,8 @@ class LogoutView(APIView):
             {"detail": "Logout successfully! All Tokens will be deleted. Refresh token is now invalid."},
             status=status.HTTP_200_OK
         )
-        response.delete_cookie("access_token", path="/", samesite="None")
-        response.delete_cookie("refresh_token", path="/", samesite="None")
+        response.delete_cookie("access_token", path="/", samesite="None", domain=".annafritz.de")
+        response.delete_cookie("refresh_token", path="/", samesite="None", domain=".annafritz.de")
         return response
 
 
