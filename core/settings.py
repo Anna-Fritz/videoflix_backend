@@ -39,6 +39,8 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SITE_URL = os.environ.get("SITE_URL", default="http://localhost:5500")
 SITE_NAME = 'Videoflix'
 
+COOKIE_DOMAIN = os.environ.get("DOMAIN", None)
+
 
 # Application definition
 
