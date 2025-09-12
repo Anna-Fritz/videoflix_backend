@@ -36,8 +36,8 @@ jobs:
           TEST_IMAGE: ghcr.io/anna-fritz/videoflix-backend/backend-test:latest
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
-          docker compose -f docker-compose.test.yml up
-          docker compose down -v
+          docker compose -f docker-compose.test.yml up --exit-code-from test
+          docker compose -f docker-compose.test.yml down -v
 
   build-and-deploy:
     runs-on: ubuntu-latest
