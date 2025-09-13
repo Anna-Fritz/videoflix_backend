@@ -4,6 +4,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from django.conf import settings
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -115,7 +116,8 @@ class CookieRefreshView(TokenRefreshView):
             httponly=True,
             secure=True,   # always True in production
             samesite="None",
-            path="/"
+            path="/",
+            domain=settings.COOKIE_DOMAIN
         )
         return response
 
@@ -139,7 +141,8 @@ class CookieEmailLoginView(TokenObtainPairView):
             httponly=True,
             secure=True,   # always True in production, better safe in .env
             samesite="None",
-            path="/"
+            path="/",
+            domain=settings.COOKIE_DOMAIN
         )
         response.set_cookie(
             key="refresh_token",
@@ -147,7 +150,8 @@ class CookieEmailLoginView(TokenObtainPairView):
             httponly=True,
             secure=True,   # always True in production, better safe in .env
             samesite="None",
-            path="/"
+            path="/",
+            domain=settings.COOKIE_DOMAIN
         )
         return response
 
@@ -171,8 +175,8 @@ class LogoutView(APIView):
             {"detail": "Logout successfully! All Tokens will be deleted. Refresh token is now invalid."},
             status=status.HTTP_200_OK
         )
-        response.delete_cookie("access_token", path="/", samesite="None")
-        response.delete_cookie("refresh_token", path="/", samesite="None")
+        response.delete_cookie("access_token", path="/", samesite="None", domain=settings.COOKIE_DOMAIN)
+        response.delete_cookie("refresh_token", path="/", samesite="None", domain=settings.COOKIE_DOMAIN)
         return response
 
 
