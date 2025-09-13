@@ -39,8 +39,6 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SITE_URL = os.environ.get("SITE_URL", default="http://localhost:5500")
 SITE_NAME = 'Videoflix'
 
-COOKIE_DOMAIN = os.environ.get("DOMAIN", None)
-
 
 # Application definition
 
@@ -72,7 +70,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
+CSRF_COOKIE_DOMAIN = os.environ.get("CSRF_COOKIE_DOMAIN", None)
+
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", default="http://localhost:5500").split(",")
+CSRF_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SECURE = True
 
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5500',
